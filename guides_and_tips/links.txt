@@ -1,1 +1,2 @@
 Extreme Learning machine introduction: https://erdem.pl/2020/05/introduction-to-extreme-learning-machines
+Progetto passato https://github.com/FraCorti/CMProject/blob/master/docs/report/report.pdf
