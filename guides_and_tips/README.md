@@ -42,7 +42,7 @@ you have taken it (down to the number of theorem/page). Also, please be sure to 
 are satisfied in your case, or which assumptions are not satisfied or you cannot prove they are. Again, we suggest to
 send us a version of this section by e-mail as soon as it is done. No code yet.
 
-###2.4  Write your code
+### 2.4  Write your code
 Coding the algorithms is a major part of the project. Languages that are often convenient for numerical computation are
 (depending on the task) Matlab, Python, and C/C++, but you can use any reasonable programming language. You are expected
 to implement the algorithm yourself; it should not be a single line of library call. However,you can use the numerical 
@@ -57,7 +57,7 @@ documentation, are not required. That said, we appreciate well-written and well-
 free to use tools such as git to ease your work, if you are familiar with them (but giving us a pointer to the git 
 repository is not the expected way to communicate with us).
 
-###2.5  Choose and describe the experimental set-up 
+### 2.5  Choose and describe the experimental set-up 
 Next, we expect a brief description of the data you will test your algorithms on. For “ML projects” this will typically 
 be provided by the ML course, but still a modicum of description is required. For “no-ML projects”, it will typically 
 have to be either generated randomly, or picked up from the Internet, or a combination of both. This is not always 
