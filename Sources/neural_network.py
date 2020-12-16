@@ -104,8 +104,7 @@ if __name__ == "__main__":
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
-                            {"neurons": 4, "activation": "linear"},
-                            # input only for dimension, insert linear as activation
+                            {"neurons": 4, "activation": "linear"}, # input only for dimension, insert linear
                             {"neurons": 5, "activation": "tanh"},
                             {"neurons": 4, "activation": "tanh"},
                             {"neurons": 3, "activation": "tanh"},
