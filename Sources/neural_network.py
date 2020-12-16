@@ -51,10 +51,6 @@ class NeuralNetwork():
         :param epochs: number of epochs do to fitting
         :return:
         """
-        # classic argument check
-        for i in range(0, len(X[0])):  # for each samples check features dimension
-            if len(X[i][1]) != self.features:
-                raise Exception("Miss features in some pattern")
 
         if len(labels) != len(X[0]):
             raise Exception("Label dimension mismatch")
@@ -63,12 +59,15 @@ class NeuralNetwork():
             raise Exception("Epoch number error")
 
         if self.solver == "sgd":
+            print("Running sgd")
             sgd()
         else:
             if self.solver == "adam":
+                print("Running adam")
                 adam()
             else:
                 if self.solver == "cholesky":
+                    print("Running cholesky")
                     cholesky()
                 else:
                     raise Exception("Wrong solver choice")
@@ -114,3 +113,5 @@ if __name__ == "__main__":
                         })
 
     nn.plot_model()
+
+    nn.fit([[1]], [[0]], 10)
