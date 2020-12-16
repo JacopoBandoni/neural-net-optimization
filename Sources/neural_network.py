@@ -35,16 +35,15 @@ class NeuralNetwork():
         else:
             raise Exception("Activation function error")
 
-
         self.weights = {}
         for i in range(1, len(self.layers)):
             self.weights['W' + str(i)] = np.random.rand(self.layers[i]['neurons'],
-                                                            self.layers[i-1]['neurons'])
-            self.weights['b'+ str(i)] = np.zeros((self.layers[i]['neurons'], 1))
+                                                        self.layers[i - 1]['neurons'])
+            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
 
         print("Neural network initialized")
 
-    def fit(self, X, labels, epochs:int):
+    def fit(self, X, labels, epochs: int):
         """
         Parameters mandatory inside the fit model:
         :param X: training data where shapes match with initialization values
@@ -60,8 +59,8 @@ class NeuralNetwork():
         if len(labels) != len(X[0]):
             raise Exception("Label dimension mismatch")
 
-        if epochs<1:
-            raise  Exception("Epoch number error")
+        if epochs < 1:
+            raise Exception("Epoch number error")
 
         if self.solver == "sgd":
             sgd()
@@ -73,8 +72,6 @@ class NeuralNetwork():
                     cholesky()
                 else:
                     raise Exception("Wrong solver choice")
-
-
 
     def predict(self, X):
         """
@@ -98,7 +95,7 @@ class NeuralNetwork():
         :return:
         """
         for l in self.weights:
-            print("Layer:",l, "weights:",self.weights[l])
+            print("Layer:", l, "weights:", self.weights[l])
 
 
 # main used for test output
@@ -107,11 +104,12 @@ if __name__ == "__main__":
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
-                            {"neurons": 4, "activation": "linear"}, # input only for dimension, insert linear as activation
+                            {"neurons": 4, "activation": "linear"},
+                            # input only for dimension, insert linear as activation
                             {"neurons": 5, "activation": "tanh"},
                             {"neurons": 4, "activation": "tanh"},
                             {"neurons": 3, "activation": "tanh"},
-                            {"neurons": 1, "activation": "sigmoid"} #output
+                            {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd'
                         })
