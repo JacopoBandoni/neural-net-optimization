@@ -1,79 +1,115 @@
 import numpy as np
-"""
-Neural network with one hidden layer, y=W2σ(W1x), where:
-the weight matrix for the hidden layer W1 is a fixed random matrix,
-σ(⋅) is an elementwise activation function of your choice,
-the output weight matrix W2 is chosen by solving a linear least-squares problem (with L_2 regularization)
-"""
+
+from Sources.solver.adam import adam
+from Sources.solver.cholesky import cholesky
+from Sources.solver.steepest_gradient_descent import sgd
 
 
-class ExtremeLearningMachine():
+class NeuralNetwork():
     """
     Parameters mandatory inside the dictionary, recognized by the model are:
-    units = [1, +inf)   number of units of the unique hidden layer
-    seed = 0
-    activation = tanh, sigmoid
-    features = [1, +inf)    number of column each pattern has
-    output = [1, +inf)      number of output neurons
+    seed = value 0. Used for test reproducibility
+    layers = list [{neurons:[1,+inf), activation:tanh},
+                ...
+                {neurons:[1,+inf), activation:sigmoid}]. List where row are info for i layer
+    solver = "sgd", "cholesky", "adam".
     """
-    def __init__(self, settings:dict):
+
+    def __init__(self, settings: dict):
         # classic argument check
         if "seed" in settings:
-            np.random.seed(settings["seed"])    # fix seed for test reproducibility
+            np.random.seed(settings["seed"])
         else:
             raise Exception("Seed not passed")
 
-        if "units" in settings and settings["units"] > 0:
-            self.units = settings["units"]
+        if "layers" in settings and len(settings["layers"]) > 0:
+            self.layers = settings["layers"]
         else:
-            raise Exception("Units number error")
+            raise Exception("Topology of network error")
 
-        if "activation" in settings and (settings["activation"] == "tanh" or settings["activation"] == "sigmoid"):
-            self.activation = settings["activation"]
+        if "solver" in settings and \
+                (settings["solver"] == "sgd" or
+                 settings["solver"] == "cholesky" or
+                 settings["solver"] == "adam"):
+            self.solver = settings["solver"]
         else:
             raise Exception("Activation function error")
 
-        if "features" in settings and settings["features"] > 0:
-            self.features = settings["features"]
-        else:
-            raise Exception("Column number of pattern error")
+        self.weights = {}
+        for i in range(1, len(self.layers)):
+            self.weights['W' + str(i)] = np.random.rand(self.layers[i]['neurons'],
+                                                        self.layers[i - 1]['neurons'])
+            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
 
-        if "output" in settings and settings["output"]> 0:
-            self.output = settings["output"]
-        else:
-            raise Exception("Output units number error")
+        print("Neural network initialized")
 
-        self.W1 = np.random.randn(self.features, self.units)    # initialize weight fixed matrix
-        self.W2 = np.random.randn(self.units, self.output)      # initialize weight to optimize
-
-        print("Model initialized")
-
-    """ 
-    Parameters mandatory inside the fit model:
-    X:  training data where shapes match with initialization values
-    Labels:  training y data where shapes match with initialization values  
-    """
-    def fit(self, X, labels):
-        # classic argument check
-        for i in range(0, len(X[0])):   # for each samples check features dimension
-            if len(X[i][1]) != self.features:
-                raise Exception("Miss features in some pattern")
+    def fit(self, X, labels, epochs: int):
+        """
+        Parameters mandatory inside the fit model:
+        :param X: training data where shapes match with initialization values
+        :param labels: training y data where shapes match with initialization values
+        :param epochs: number of epochs do to fitting
+        :return:
+        """
 
         if len(labels) != len(X[0]):
             raise Exception("Label dimension mismatch")
 
-    """ Parameter
-    X: Test data where is computed output
-    """
+        if epochs < 1:
+            raise Exception("Epoch number error")
+
+        if self.solver == "sgd":
+            print("Running sgd")
+            sgd()
+        elif self.solver == "adam":
+            print("Running adam")
+            adam()
+        elif self.solver == "cholesky":
+            print("Running cholesky")
+            cholesky()
+        else:
+            raise Exception("Wrong solver choice")
+
     def predict(self, X):
+        """
+        :param X: X: Test data where is computed output
+        :return:
+        """
         pass
 
-    """ 
-    X: test data where is computed output
-    Labels: target output where is computed scored function
-    """
     def score(self, X, labels):
+        """
+
+        :param X: test data where is computed output
+        :param labels: target output where is computed scored function
+        :return:
+        """
         pass
 
+    def plot_model(self):
+        """
+        Show an image with the topology of the network
+        :return:
+        """
+        for l in self.weights:
+            print("Layer:", l, "weights:", self.weights[l])
 
 
+# main used for test output
+if __name__ == "__main__":
+    print("Neural network tests")
+
+    nn = NeuralNetwork({'seed': 0,
+                        'layers': [
+                            {"neurons": 4, "activation": "linear"}, # input only for dimension, insert linear
+                            {"neurons": 5, "activation": "tanh"},
+                            {"neurons": 4, "activation": "tanh"},
+                            {"neurons": 3, "activation": "tanh"},
+                            {"neurons": 1, "activation": "sigmoid"}  # output
+                        ],
+                        'solver': 'sgd'
+                        })
+
+    nn.plot_model()
+
+    nn.fit([[1]], [[0]], 10)
