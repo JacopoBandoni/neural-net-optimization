@@ -41,6 +41,31 @@ def mean_euclidean_error(output: list, target: list):
     return mee
 
 
+def mean_squared_loss(output: list, target: list, weights:list, lam:float):
+    """
+    Loss function used to evaluate performance in monk dataset (classification)
+    :param output: list of list [[x_1, y_1, z_1, ...], [x_2, y_2, z_2, ...], ...] Outputs of the net for each point
+    :param target: list of list [[x_1, y_1, z_1, ...], [x_2, y_2, z_2, ...], ...] Output real of points
+    :param weights: all the weights of the network
+    :param lam: hyperparameter
+    :return:
+    """
+    if len(output) != len(target):
+        raise Exception("Dimension error")
+
+    difference = np.subtract(output, target)
+    squared = np.square(difference)
+    mse = squared.mean()
+
+
+    # we have to transform our rappresentation matrix to a matrix of weights to compute norm
+
+    penalty = np.linalg.norm()
+
+
+    return mse
+
+
 # main used for test output
 if __name__ == "__main__":
     print("Score function tests")

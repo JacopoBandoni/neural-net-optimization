@@ -14,4 +14,4 @@ def tanh(x):
 
 if __name__ == "__main__":
     print("Activation function tests")
-    print(sigmoid(0.6))
+    print(sigmoid(-0.6))
