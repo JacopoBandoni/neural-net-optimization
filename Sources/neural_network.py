@@ -42,8 +42,8 @@ class NeuralNetwork():
                                   "b" + str(i + 1): np.zeros(self.units[i])}])
 
         # add output layer: each row is one output with corresponding weights
-        self.weights.append([{'Wout': [np.random.rand(self.units[-1], self.units[len(self.units) - 2])],
-                              "bout": np.zeros(self.units[-1])}])
+        self.weights.append([{'W'+str(len(self.units)): [np.random.rand(self.units[-1], self.units[len(self.units) - 2])],
+                              "b"+str(len(self.units)): np.zeros(self.units[-1])}])
 
         print("Neural network initialized")
 
