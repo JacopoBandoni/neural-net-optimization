@@ -9,9 +9,10 @@ class NeuralNetwork():
     """
     Parameters mandatory inside the dictionary, recognized by the model are:
     seed = value 0. Used for test reproducibility
-    units = list [3,2,1]. Each value corresponds to the number of units in i layer
-    activation = string tanh, sigmoid. Activation function chosen
-    features = value [1, +inf). Number of column each pattern has
+    layers = list [{neurons:[1,+inf), activation:tanh},
+                ...
+                {neurons:[1,+inf), activation:sigmoid}]. List where row are info for i layer
+    solver = "sgd", "cholesky", "adam".
     """
 
     def __init__(self, settings: dict):
@@ -21,36 +22,25 @@ class NeuralNetwork():
         else:
             raise Exception("Seed not passed")
 
-        if "units" in settings and len(settings["units"]) > 0:
-            self.units = settings["units"]
+        if "layers" in settings and len(settings["layers"]) > 0:
+            self.layers = settings["layers"]
         else:
-            raise Exception("Neurons number error")
+            raise Exception("Topology of network error")
 
-        if "activation" in settings and \
-                (settings["activation"] == "tanh" or
-                 settings["activation"] == "sigmoid" or
-                 settings["actovaton"] == "sgd"):
-            self.activation = settings["activation"]
+        if "solver" in settings and \
+                (settings["solver"] == "sgd" or
+                 settings["solver"] == "cholesky" or
+                 settings["solver"] == "adam"):
+            self.solver = settings["solver"]
         else:
             raise Exception("Activation function error")
 
-        if "features" in settings and settings["features"] > 0:
-            self.features = settings["features"]
-        else:
-            raise Exception("Column number of pattern error")
 
-        self.weights = []
-        # add input layer: row are neurons (1 = neuron 1) and column the corresponding weight for the i neuron
-        self.weights.append({"W1": np.random.rand(self.units[0], self.features), "b1": np.zeros(self.units[0])})
-
-        # add hidden layers: row are neurons (1 = neuron 1) and column the corresponding weight for the i neuron
-        for i in range(1, len(self.units) - 1):
-            self.weights.append([{'W' + str(i + 1): [np.random.rand(self.units[i], self.units[i - 1])],
-                                  "b" + str(i + 1): np.zeros(self.units[i])}])
-
-        # add output layer: each row is one output with corresponding weights
-        self.weights.append([{'W'+str(len(self.units)): [np.random.rand(self.units[-1], self.units[len(self.units) - 2])],
-                              "b"+str(len(self.units)): np.zeros(self.units[-1])}])
+        self.weights = {}
+        for i in range(1, len(self.layers)):
+            self.weights['W' + str(i)] = np.random.rand(self.layers[i]['neurons'],
+                                                            self.layers[i-1]['neurons'])
+            self.weights['b'+ str(i)] = np.zeros((self.layers[i]['neurons'], 1))
 
         print("Neural network initialized")
 
@@ -73,13 +63,13 @@ class NeuralNetwork():
         if epochs<1:
             raise  Exception("Epoch number error")
 
-        if self.activation == "sgd":
+        if self.solver == "sgd":
             sgd()
         else:
-            if self.activation == "adam":
+            if self.solver == "adam":
                 adam()
             else:
-                if self.activation == "cholesky":
+                if self.solver == "cholesky":
                     cholesky()
                 else:
                     raise Exception("Wrong solver choice")
@@ -108,7 +98,7 @@ class NeuralNetwork():
         :return:
         """
         for l in self.weights:
-            print(l)
+            print("Layer:",l, "weights:",self.weights[l])
 
 
 # main used for test output
@@ -116,8 +106,14 @@ if __name__ == "__main__":
     print("Neural network tests")
 
     nn = NeuralNetwork({'seed': 0,
-                        'units': [3, 1],
-                        'activation': 'sigmoid',
-                        'features': 4})
+                        'layers': [
+                            {"neurons": 4, "activation": "linear"}, # input only for dimension, insert linear as activation
+                            {"neurons": 5, "activation": "tanh"},
+                            {"neurons": 4, "activation": "tanh"},
+                            {"neurons": 3, "activation": "tanh"},
+                            {"neurons": 1, "activation": "sigmoid"} #output
+                        ],
+                        'solver': 'sgd'
+                        })
 
     nn.plot_model()
