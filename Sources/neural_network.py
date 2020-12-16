@@ -61,16 +61,14 @@ class NeuralNetwork():
         if self.solver == "sgd":
             print("Running sgd")
             sgd()
+        elif self.solver == "adam":
+            print("Running adam")
+            adam()
+        elif self.solver == "cholesky":
+            print("Running cholesky")
+            cholesky()
         else:
-            if self.solver == "adam":
-                print("Running adam")
-                adam()
-            else:
-                if self.solver == "cholesky":
-                    print("Running cholesky")
-                    cholesky()
-                else:
-                    raise Exception("Wrong solver choice")
+            raise Exception("Wrong solver choice")
 
     def predict(self, X):
         """
