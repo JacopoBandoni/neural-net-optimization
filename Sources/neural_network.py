@@ -1,5 +1,9 @@
 import numpy as np
 
+from Sources.solver.adam import adam
+from Sources.solver.cholesky import cholesky
+from Sources.solver.steepest_gradient_descent import sgd
+
 
 class NeuralNetwork():
     """
@@ -22,7 +26,10 @@ class NeuralNetwork():
         else:
             raise Exception("Neurons number error")
 
-        if "activation" in settings and (settings["activation"] == "tanh" or settings["activation"] == "sigmoid"):
+        if "activation" in settings and \
+                (settings["activation"] == "tanh" or
+                 settings["activation"] == "sigmoid" or
+                 settings["actovaton"] == "sgd"):
             self.activation = settings["activation"]
         else:
             raise Exception("Activation function error")
@@ -47,11 +54,12 @@ class NeuralNetwork():
 
         print("Neural network initialized")
 
-    def fit(self, X, labels):
+    def fit(self, X, labels, epochs:int):
         """
         Parameters mandatory inside the fit model:
         :param X: training data where shapes match with initialization values
         :param labels: training y data where shapes match with initialization values
+        :param epochs: number of epochs do to fitting
         :return:
         """
         # classic argument check
@@ -61,6 +69,22 @@ class NeuralNetwork():
 
         if len(labels) != len(X[0]):
             raise Exception("Label dimension mismatch")
+
+        if epochs<1:
+            raise  Exception("Epoch number error")
+
+        if self.activation == "sgd":
+            sgd()
+        else:
+            if self.activation == "adam":
+                adam()
+            else:
+                if self.activation == "cholesky":
+                    cholesky()
+                else:
+                    raise Exception("Wrong solver choice")
+
+
 
     def predict(self, X):
         """

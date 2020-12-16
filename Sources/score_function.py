@@ -40,7 +40,7 @@ def mean_euclidean_error(output: list, target: list):
 
     return mee
 
-
+# TODO complete the loss function
 def mean_squared_loss(output: list, target: list, weights:list, lam:float):
     """
     Loss function used to evaluate performance in monk dataset (classification)
