@@ -3,7 +3,7 @@ import numpy as np
 from Sources.tools.activation_function import sigmoid, tanh
 
 
-def sgd(X, labels, weights, learning_rate: float, epsilon: float):
+def sgd(X, labels, weights:dict, learning_rate: float, epsilon: float):
     """
     :param X: training data where shapes match with initialization values
     :param labels: training y data where shapes match with initialization values
@@ -12,7 +12,7 @@ def sgd(X, labels, weights, learning_rate: float, epsilon: float):
     """
 
 
-def forward_pass(X, weights, layers):
+def forward_pass(X, weights:dict, layers):
     """
     Apply a forward pass in the network
     :param X: input vector of training set
@@ -61,5 +61,5 @@ def activation_forward(layer_input, W, b, activation):
     return Z, layer_output
 
 
-def compute_loss(output, labels):
+def compute_loss(output, labels, layers_number:int):
     pass
