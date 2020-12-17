@@ -1,6 +1,7 @@
 import numpy as np
 
 from Sources.tools.activation_function import sigmoid, tanh
+from Sources.tools.score_function import mean_squared_loss
 
 
 def sgd(X, labels, weights:dict, learning_rate: float, epsilon: float):
@@ -61,5 +62,33 @@ def activation_forward(layer_input, W, b, activation):
     return Z, layer_output
 
 
-def compute_loss(output, labels, layers_number:int):
-    pass
+def compute_loss(output, labels, weights:dict, lam:float, layers_number:int):
+    return mean_squared_loss(output, labels, weights, lam, layers_number)
+
+
+def backward_pass(output, labels, weights:dict, forward_cache:dict, layers):
+    grads = {}
+    number_of_layer = len(layers)
+
+    labels = np.array(labels)
+    y = labels.reshape(output.shape)    # labels are not same shape as output to match dimensions
+
+
+    for layer in reversed(range(1, number_of_layer)): # start from last layer
+        W = weights['W ' + str(layer)]  # retrieve corresponding weights
+        b = weights['b ' + str(layer)]  # retrieve corresponding bias
+        activation = layers[layer]["activation"]  # retrieve corresponding activation function
+
+        output_previous = forward_cache['layer_output' + str(layer - 1)]
+
+        activation_backward()
+
+
+def activation_backward(activation):
+    if activation == "simoid":
+        Z_derivative =
+    elif activation == "tanh":
+
+    else:
+        raise  Exception("Activation function not recognized")
+

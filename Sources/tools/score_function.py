@@ -47,8 +47,9 @@ def mean_squared_loss(output: list, target: list, weights: dict, lam: float, lay
     Error function used to evaluate performance in monk dataset (classification)
     :param output: list [h(x_1), h(x_2), ...]. Outputs of the net for all sample
     :param target: list [y_1, y_2, ...]. Real output of all samples
-    :param lambda: hyperparameter used to compute penalty term
     :param weights: dictionary of weight and bias
+    :param lam: hyperparameter used to compute penalty term
+    :param layers_number: number of layer used to retrieve weights
     :return: loss score
     """
     if len(output) != len(target):
