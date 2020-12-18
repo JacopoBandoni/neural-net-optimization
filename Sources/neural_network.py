@@ -43,7 +43,7 @@ class NeuralNetwork():
 
         print("Neural network initialized")
 
-    def fit(self, X, labels, epochs: int):
+    def fit(self, X, labels, learning_rate: float, error: float, epochs: int, batch_size: int, shuffle:bool):
         """
         Parameters mandatory inside the fit model:
         :param X: training data where shapes match with initialization values
@@ -52,7 +52,7 @@ class NeuralNetwork():
         :return:
         """
 
-        if len(labels) != len(X[0]):
+        if len(labels) != len(X):
             raise Exception("Label dimension mismatch")
 
         if epochs < 1:
@@ -60,7 +60,7 @@ class NeuralNetwork():
 
         if self.solver == "sgd":
             print("Running sgd")
-            sgd()
+            sgd(X, labels, self.weights, self.layers, learning_rate, error, epochs, batch_size, shuffle)
         elif self.solver == "adam":
             print("Running adam")
             adam()
@@ -99,12 +99,14 @@ class NeuralNetwork():
 if __name__ == "__main__":
     print("Neural network tests")
 
+    X = [[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]]
+    labels = [[1], [0], [0], [1], [1]]
+
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
-                            {"neurons": 4, "activation": "linear"}, # input only for dimension, insert linear
-                            {"neurons": 5, "activation": "tanh"},
-                            {"neurons": 4, "activation": "tanh"},
+                            {"neurons": len(X), "activation": "linear"},  # input only for dimension, insert linear
                             {"neurons": 3, "activation": "tanh"},
+                            {"neurons": 4, "activation": "tanh"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd'
@@ -112,4 +114,10 @@ if __name__ == "__main__":
 
     nn.plot_model()
 
-    nn.fit([[1]], [[0]], 10)
+    epochs = 5
+    learning_rate = 0.001
+    error = 0.00001
+    batch_size = 2
+    shuffle = True
+
+    nn.fit(X, labels, learning_rate, error, epochs, batch_size, shuffle)
