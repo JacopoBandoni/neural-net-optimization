@@ -2,7 +2,7 @@ import numpy as np
 
 from Sources.tools.activation_function import sigmoid, tanh
 from Sources.tools.score_function import mean_squared_loss, mean_squared_error
-from Sources.tools.useful import batch
+from Sources.tools.useful import batch, unison_shuffle
 
 
 def sgd(X, labels, weights: dict, layers: dict, learning_rate: float, epsilon: float, epochs: int, batch_size: int,
@@ -18,12 +18,11 @@ def sgd(X, labels, weights: dict, layers: dict, learning_rate: float, epsilon: f
 
     for e in range(0, epochs):
         print("Epoch:", e)
-        for x, y in batch(X, labels, batch_size):   # get batch of x and y
+        for x, y in batch(X, labels, batch_size):  # get batch of x and y
             print("Batch x:", x, ", Batch y:", y)
 
-
         if shuffle:
-            pass
+            X, labels = unison_shuffle(X, labels)
         """
 
         sample_batch = []
