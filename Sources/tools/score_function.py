@@ -63,9 +63,9 @@ def mean_squared_loss(output: list, target: list, weights: dict, lam: float, lay
         W = np.array(weights['W ' + str(layer)])  # retrieve corresponding weights of layer
         all_weights.append(W.flatten())  # move to one dimensional array and add to the list
 
-    all_weights = np.array(all_weights).flatten() # move to one dimensional array with all weights
+    all_weights = np.array(all_weights).flatten()  # move to one dimensional array with all weights
 
-    penalty_term = lam*(np.linalg.norm(all_weights))
+    penalty_term = lam * (np.linalg.norm(all_weights))
 
     mse_loss = mse + penalty_term
 

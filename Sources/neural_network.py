@@ -38,6 +38,8 @@ class NeuralNetwork():
 
         if "problem" in settings and settings["problem"] == "classification" or settings["problem"] == "regression":
             self.problem = settings["problem"]
+        else:
+            raise Exception("Problem statement error")
 
         self.__initialize_weights()
 
@@ -112,7 +114,6 @@ if __name__ == "__main__":
 
     X = [[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]]
     labels = [[1], [0], [0], [1], [1]]
-
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [

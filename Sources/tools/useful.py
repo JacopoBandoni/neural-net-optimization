@@ -1,6 +1,7 @@
 import numpy as np
 import random
 
+
 def batch(X, y, n=1):
     """
     Method to return batches over X and y vector
@@ -14,10 +15,11 @@ def batch(X, y, n=1):
 
 
 def unison_shuffle(X, y):
-    unified = list(zip(X, y)) # create pair of x and y
+    unified = list(zip(X, y))  # create pair of x and y
     random.shuffle(unified)
-    X, y = zip(*unified) # unzip pair mantaining order
+    X, y = zip(*unified)  # unzip pair mantaining order
     return X, y
+
 
 # main used for test output
 if __name__ == "__main__":
