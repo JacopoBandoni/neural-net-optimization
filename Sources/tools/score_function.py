@@ -60,7 +60,7 @@ def mean_squared_loss(output: list, target: list, weights: dict, lam: float, lay
     # we take vector of all weights in the network
     all_weights = []
     for layer in range(1, layers_number):
-        W = np.array(weights['W ' + str(layer)])  # retrieve corresponding weights of layer
+        W = np.array(weights['W' + str(layer)])  # retrieve corresponding weights of layer
         all_weights.append(W.flatten())  # move to one dimensional array and add to the list
 
     all_weights = np.array(all_weights).flatten()  # move to one dimensional array with all weights

@@ -56,7 +56,7 @@ class NeuralNetwork():
             self.weights['W' + str(i)] = W_i
             self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
 
-    def fit(self, X, labels, hyperparameters:dict, epochs: int, batch_size: int, shuffle: bool):
+    def fit(self, X, labels, hyperparameters: dict, epochs: int, batch_size: int, shuffle: bool):
         """
         :param X:
         :param labels:
@@ -74,8 +74,8 @@ class NeuralNetwork():
             raise Exception("Epoch number error")
 
         if self.solver == "sgd":
-            print("Running sgd")
-            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
+            print("...Running sgd...")
+            sgd(X, labels, self.weights, self.layers, self.problem, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "adam":
             print("Running adam")
@@ -110,10 +110,9 @@ class NeuralNetwork():
         :return:
         """
         for keys in self.weights:
-            print("-->", keys,":")
+            print("-->", keys, ":")
             for value in self.weights[keys]:
                 print(value)
-
 
 
 # main used for test output
@@ -126,8 +125,8 @@ if __name__ == "__main__":
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(X[0]), "activation": "linear"},  # input only for dimension, insert linear
-                            {"neurons": 3, "activation": "tanh"},
-                            {"neurons": 4, "activation": "tanh"},
+                            {"neurons": 3, "activation": "sigmoid"},
+                            {"neurons": 4, "activation": "sigmoid"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd',
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     hyperparameters = {
         "learning_rate": 0.001,
         "epsilon": 0.00001,
-        "lambda":0.01
+        "lambda": 0.01
     }
     epochs = 5
     batch_size = 2

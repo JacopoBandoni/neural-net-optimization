@@ -5,7 +5,7 @@ from Sources.tools.score_function import mean_squared_loss, mean_squared_error
 from Sources.tools.useful import batch, unison_shuffle
 
 
-def sgd(X, labels, weights: dict, layers: dict, hyperparameters:dict, epochs: int, batch_size: int,
+def sgd(X, labels, weights: dict, layers: dict, problem:str, hyperparameters:dict, epochs: int, batch_size: int,
         shuffle: bool):
     """
     Compute steepest gradient descent, either batch or stochastic
@@ -29,34 +29,39 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters:dict, epochs: in
         print("Epoch:", e)
 
         for x, y in batch(X, labels, batch_size):  # get batch of x and y
-            print("Batch x:", x, ", Batch y:", y)
+            print("Creating batch x:", x, ", Batch y:", y)
 
+            outputs = []
             for sample in range(len(x)): # for each sample in batch
-
                 output, forward_cache = __forward_pass(x[sample], weights, layers)
 
-                print(forward_cache)
-                error = mean_squared_error(output, y[sample])
+                # round results based on problem choose
+                if problem == "classification": # if it's classification round based on output
+                    if layers[-1]["activation"] == "sigmoid":   # 0,1
+                        if output>= 0.5:
+                            output = 1
+                        else:
+                            output = 0
 
-                loss = mean_squared_loss(output, y, weights, hyperparameters["lambda"])
+                    elif layers[-1]["activation"] == "tanh":    # -1, 1
+                        if output >= 0:
+                            output = 1
+                        else:
+                            output = 0
+                outputs.append(output)
 
-                print("Error:", error)
-                print("loss", loss)
+            error = mean_squared_error(outputs, y)
+
+            #loss = mean_squared_loss(outputs, y, weights, hyperparameters["lambda"], len(layers))
+
+            print("->Error:", error, ", Loss", 0)
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
-        """
-
-        sample_batch = []
-
-        output, forward_cache = forward_pass(X, weights, layers)
-
-        error = mean_squared_error(output, labels)
-        
-        """
 
 
-def __forward_pass(X, weights: dict, layers):
+
+def __forward_pass(x, weights: dict, layers):
     """
     Apply a forward pass in the network
     :param X: input vector of training set
@@ -65,11 +70,13 @@ def __forward_pass(X, weights: dict, layers):
     :return: tuple (output, cache). output is the prediction of our network, cahce is all weight in intermediate steps
     """
     forward_cache = {}  # here we will store status in forward pass
-    layer_input = X  # we don't update original values
+    layer_input = np.array([x]).transpose()  # we don't update original values, the transpose is to match dimension
 
     for layer in range(1, len(layers)):
         W = weights['W' + str(layer)]  # retrieve corresponding weights
-        b = weights['b' + str(layer)]  # retrieve corresponding bias
+
+        b = np.array(weights['b' + str(layer)])  # retrieve corresponding bias and do transpose
+
         activation = layers[layer]["activation"]  # retrieve corresponding activation function
 
         # compute first linear activation of one layer
