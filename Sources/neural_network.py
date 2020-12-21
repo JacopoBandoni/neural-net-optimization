@@ -12,7 +12,8 @@ class NeuralNetwork():
     layers = list [{neurons:[1,+inf), activation:tanh},
                 ...
                 {neurons:[1,+inf), activation:sigmoid}]. List where row are info for i layer
-    solver = "sgd", "cholesky", "adam".
+    solver = "sgd", "cholesky", "adam"
+    problem = "classification", "regression"
     """
 
     def __init__(self, settings: dict):
@@ -35,15 +36,25 @@ class NeuralNetwork():
         else:
             raise Exception("Activation function error")
 
-        self.weights = {}
-        for i in range(1, len(self.layers)):
-            self.weights['W' + str(i)] = np.random.rand(self.layers[i]['neurons'],
-                                                        self.layers[i - 1]['neurons'])
-            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
+        if "problem" in settings and settings["problem"] == "classification" or settings["problem"] == "regression":
+            self.problem = settings["problem"]
+
+        self.__initialize_weights()
 
         print("Neural network initialized")
 
-    def fit(self, X, labels, learning_rate: float, error: float, epochs: int, batch_size: int, shuffle:bool):
+    def __initialize_weights(self):
+        self.weights = {}
+
+        for i in range(1, len(self.layers)):
+            W_i = []
+            for neuron in range(self.layers[i]['neurons']):
+                W_i.append([np.random.uniform(-0.7, 0.7) for _ in range(self.layers[i - 1]['neurons'])])
+
+            self.weights['W' + str(i)] = W_i
+            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
+
+    def fit(self, X, labels, learning_rate: float, error: float, epochs: int, batch_size: int, shuffle: bool):
         """
         Parameters mandatory inside the fit model:
         :param X: training data where shapes match with initialization values
@@ -102,6 +113,7 @@ if __name__ == "__main__":
     X = [[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]]
     labels = [[1], [0], [0], [1], [1]]
 
+
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(X), "activation": "linear"},  # input only for dimension, insert linear
@@ -109,7 +121,8 @@ if __name__ == "__main__":
                             {"neurons": 4, "activation": "tanh"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
-                        'solver': 'sgd'
+                        'solver': 'sgd',
+                        "problem": "classification"
                         })
 
     nn.plot_model()
