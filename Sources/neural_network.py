@@ -12,7 +12,8 @@ class NeuralNetwork():
     layers = list [{neurons:[1,+inf), activation:tanh},
                 ...
                 {neurons:[1,+inf), activation:sigmoid}]. List where row are info for i layer
-    solver = "sgd", "cholesky", "adam".
+    solver = "sgd", "cholesky", "adam"
+    problem = "classification", "regression"
     """
 
     def __init__(self, settings: dict):
@@ -35,38 +36,55 @@ class NeuralNetwork():
         else:
             raise Exception("Activation function error")
 
-        self.weights = {}
-        for i in range(1, len(self.layers)):
-            self.weights['W' + str(i)] = np.random.rand(self.layers[i]['neurons'],
-                                                        self.layers[i - 1]['neurons'])
-            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
+        if "problem" in settings and settings["problem"] == "classification" or settings["problem"] == "regression":
+            self.problem = settings["problem"]
+        else:
+            raise Exception("Problem statement error")
+
+        self.__initialize_weights()
 
         print("Neural network initialized")
 
-    def fit(self, X, labels, epochs: int):
+    def __initialize_weights(self):
+        self.weights = {}
+
+        for i in range(1, len(self.layers)):
+            W_i = []
+            for neuron in range(self.layers[i]['neurons']):
+                W_i.append([np.random.uniform(-0.7, 0.7) for _ in range(self.layers[i - 1]['neurons'])])
+
+            self.weights['W' + str(i)] = W_i
+            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
+
+    def fit(self, X, labels, hyperparameters: dict, epochs: int, batch_size: int, shuffle: bool):
         """
-        Parameters mandatory inside the fit model:
-        :param X: training data where shapes match with initialization values
-        :param labels: training y data where shapes match with initialization values
-        :param epochs: number of epochs do to fitting
+        :param X:
+        :param labels:
+        :param hyperparameters:
+        :param epochs:
+        :param batch_size:
+        :param shuffle:
         :return:
         """
 
-        if len(labels) != len(X[0]):
+        if len(labels) != len(X):
             raise Exception("Label dimension mismatch")
 
         if epochs < 1:
             raise Exception("Epoch number error")
 
         if self.solver == "sgd":
-            print("Running sgd")
-            sgd()
+            print("...Running sgd...")
+            sgd(X, labels, self.weights, self.layers, self.problem, hyperparameters, epochs, batch_size, shuffle)
+
         elif self.solver == "adam":
             print("Running adam")
             adam()
+
         elif self.solver == "cholesky":
             print("Running cholesky")
             cholesky()
+
         else:
             raise Exception("Wrong solver choice")
 
@@ -91,25 +109,39 @@ class NeuralNetwork():
         Show an image with the topology of the network
         :return:
         """
-        for l in self.weights:
-            print("Layer:", l, "weights:", self.weights[l])
+        for keys in self.weights:
+            print("-->", keys, ":")
+            for value in self.weights[keys]:
+                print(value)
 
 
 # main used for test output
 if __name__ == "__main__":
     print("Neural network tests")
 
+    X = [[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]]
+    labels = [[1], [0], [0], [1], [1]]
+
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
-                            {"neurons": 4, "activation": "linear"}, # input only for dimension, insert linear
-                            {"neurons": 5, "activation": "tanh"},
-                            {"neurons": 4, "activation": "tanh"},
-                            {"neurons": 3, "activation": "tanh"},
+                            {"neurons": len(X[0]), "activation": "linear"},  # input only for dimension, insert linear
+                            {"neurons": 3, "activation": "sigmoid"},
+                            {"neurons": 4, "activation": "sigmoid"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
-                        'solver': 'sgd'
+                        'solver': 'sgd',
+                        "problem": "classification"
                         })
 
     nn.plot_model()
 
-    nn.fit([[1]], [[0]], 10)
+    hyperparameters = {
+        "learning_rate": 0.001,
+        "epsilon": 0.00001,
+        "lambda": 0.01
+    }
+    epochs = 5
+    batch_size = 2
+    shuffle = True
+
+    nn.fit(X, labels, hyperparameters, epochs, batch_size, shuffle)
