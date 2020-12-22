@@ -1,6 +1,13 @@
-def load_monk_1():
+import numpy as np
+
+
+def load_monk(version: int):
     """
-    Load dataset of monk (a1=a2 or a5=1) in Data folder. Attribute information:
+    Load dataset of monk in Data folder.
+    Monk 1 = (a1=a2 or a5=1)
+    Monk 2 = (two of a1=1, a2=1, a3=1, a4=1, a5=1, a6=1)
+    Monk 3 = (a5=3, a4=1 or a5 != 4 and a2 != 3. Noisy data)
+    Attribute information:
     0. class: 0, 1
     1. a1:    1, 2, 3
     2. a2:    1, 2, 3
@@ -10,19 +17,33 @@ def load_monk_1():
     6. a6:    1, 2
     7. Id:    (A unique symbol for each instance)
     :return:
+
     """
-    print("Loading monk 1 dataset")
+    if version == 1:
+        print("Loading monk 1 dataset")
+        path_train = '../../Data/monks-1.train'
+        path_test = '../../Data/monks-1.test'
+    elif version == 2:
+        print("Loading monk 2 dataset")
+        path_train = '../../Data/monks-2.train'
+        path_test = '../../Data/monks-2.test'
+    elif version == 3:
+        print("Loading monk 3 dataset")
+        path_train = '../../Data/monks-3.train'
+        path_test = '../../Data/monks-3.test'
+    else:
+        raise Exception("This monk version doesn't exist")
 
     # load train data
     X_train = []
     y_train = []
     names_train = []
-    with open('../../Data/monks-1.train', 'r') as f:
+    with open(path_train, 'r') as f:
         for line in f:
             line = line.split()
 
-            y_train.append(line[0])
-            X_train.append(line[1:7])
+            y_train.append(int(line[0]))
+            X_train.append(np.array(line[1:7]).astype(int))
             names_train.append(line[7])
 
     if len(X_train) != len(y_train):
@@ -32,106 +53,7 @@ def load_monk_1():
     X_test = []
     y_test = []
     names_test = []
-    with open('../../Data/monks-1.test', 'r') as f:
-        for line in f:
-            line = line.split()
-
-            y_test.append(line[0])
-            X_test.append(line[1:7])
-            names_test.append(line[7])
-
-    if len(X_train) != len(y_train):
-        raise Exception("Test Loading error")
-
-    print("Training data:", len(X_train), ", Test data:", len(X_test))
-    return (X_train, y_train, names_train), (X_test, y_test, names_test)
-
-
-def load_monk_2():
-    """
-        Load dataset of monk (two of a1=1, a2=1, a3=1, a4=1, a5=1, a6=1) in Data folder. Attribute information:
-        0. class: 0, 1
-        1. a1:    1, 2, 3
-        2. a2:    1, 2, 3
-        3. a3:    1, 2
-        4. a4:    1, 2, 3
-        5. a5:    1, 2, 3, 4
-        6. a6:    1, 2
-        7. Id:    (A unique symbol for each instance)
-        :return:
-        """
-    print("Loading monk 2 dataset")
-
-    # load train data
-    X_train = []
-    y_train = []
-    names_train = []
-    with open('../../Data/monks-2.train', 'r') as f:
-        for line in f:
-            line = line.split()
-
-            y_train.append(line[0])
-            X_train.append(line[1:7])
-            names_train.append(line[7])
-
-    if len(X_train) != len(y_train):
-        raise Exception("Train Loading error")
-
-    # load test data
-    X_test = []
-    y_test = []
-    names_test = []
-    with open('../../Data/monks-2.test', 'r') as f:
-        for line in f:
-            line = line.split()
-
-            y_test.append(line[0])
-            X_test.append(line[1:7])
-            names_test.append(line[7])
-
-    if len(X_train) != len(y_train):
-        raise Exception("Test Loading error")
-
-    print("Training data:", len(X_train), ", Test data:", len(X_test))
-    return (X_train, y_train, names_train), (X_test, y_test, names_test)
-
-
-def load_monk_3():
-    """
-        Load dataset of monk 3 (a5=3, a4=1 or a5 != 4 and a2 != 3. Noisy data) stored in Data folder.
-        Attribute information:
-        0. class: 0, 1
-        1. a1:    1, 2, 3
-        2. a2:    1, 2, 3
-        3. a3:    1, 2
-        4. a4:    1, 2, 3
-        5. a5:    1, 2, 3, 4
-        6. a6:    1, 2
-        7. Id:    (A unique symbol for each instance)
-        :return:
-        """
-    print("Loading monk 3 dataset")
-
-    # load train data
-    X_train = []
-    y_train = []
-    names_train = []
-    with open('../../Data/monks-3.train', 'r') as f:
-        for line in f:
-            line = line.split()
-
-            y_train.append(line[0])
-            X_train.append(line[1:7])
-            names_train.append(line[7])
-
-    if len(X_train) != len(y_train):
-        raise Exception("Train Loading error")
-
-    # load test data
-    X_test = []
-    y_test = []
-    names_test = []
-    with open('../../Data/monks-3.test', 'r') as f:
+    with open(path_test, 'r') as f:
         for line in f:
             line = line.split()
 
@@ -155,4 +77,6 @@ def load_cup20():
 if __name__ == "__main__":
     print("Load dataset test")
 
-    load_monk_3()
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
+
+    print(X_train)
