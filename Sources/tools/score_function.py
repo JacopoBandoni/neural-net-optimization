@@ -17,6 +17,29 @@ def mean_squared_error(output: list, target: list):
 
     return mse
 
+def classification_accuracy(output: list, target: list):
+    """
+    it measures the accuracy of the model
+    :param output: the output of the model already "tresholded" respect to an input X
+    :param target: the expected output for the input X
+    :return: the classification accuracy of the model in percentage
+    """
+
+    if len(output) != len(target):
+        raise Exception("Dimension error")
+
+    correct = 0
+    wrong = 0
+
+    for i in range(0, len(target)):
+
+        if output[i] == target[i]:
+            correct += 1
+        else:
+            wrong += 1
+
+    return (correct*100)/len(target)
+
 
 def mean_euclidean_error(output: list, target: list):
     """

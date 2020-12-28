@@ -1,7 +1,7 @@
 import numpy as np
 
 from Sources.tools.activation_function import sigmoid, tanh
-from Sources.tools.score_function import mean_squared_loss, mean_squared_error
+from Sources.tools.score_function import mean_squared_loss, mean_squared_error, classification_accuracy
 from Sources.tools.useful import batch, unison_shuffle
 
 
@@ -25,39 +25,39 @@ def sgd(X, labels, weights: dict, layers: dict, problem:str, hyperparameters:dic
 
     errors = []
 
-    for e in range(0, epochs):
-        print("Epoch:", e)
+    """
+    NOTE I can probably remove the accuracy, it's needed at the end not at each epoch
+    if problem == "classification":
+        tresholed_output = [[]]
+        accuracy = 0"""
 
-        for x, y in batch(X, labels, batch_size):  # get batch of x and y
-            print("Creating batch x:", x, ", Batch y:", y)
+    for i in range(0, epochs):
 
-            outputs = []
-            for sample in range(len(x)): # for each sample in batch
-                output, forward_cache = __forward_pass(x[sample], weights, layers)
+        for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
-                # round results based on problem choose
-                if problem == "classification": # if it's classification round based on output
-                    if layers[-1]["activation"] == "sigmoid":   # 0,1
-                        if output>= 0.5:
-                            output = 1
-                        else:
-                            output = 0
+            # forward propagatiom
+            output, forward_cache = __forward_pass(Xi, weights, layers)
 
-                    elif layers[-1]["activation"] == "tanh":    # -1, 1
-                        if output >= 0:
-                            output = 1
-                        else:
-                            output = 0
-                outputs.append(output)
+            """ 
+            NOTE I can probably remove the accuracy, it's needed at the end not at each epoch
+            # round results based on problem choose
+            if problem == "classification": # if it's classification round based on output
+                tresholed_output = [0 if o < 0.5 else 1 for o in output]
+                accuracy = classification_accuracy(tresholed_output, Yi)"""
 
-            error = mean_squared_error(outputs, y)
+            error = mean_squared_error(output, Yi)
+            errors.append(error)
 
-            #loss = mean_squared_loss(outputs, y, weights, hyperparameters["lambda"], len(layers))
+            # backward propagation
 
-            print("->Error:", error, ", Loss", 0)
+        # perchè calcolare la loss ad ogni epoch? La loss ci serve per allenare e basta
+        #loss = mean_squared_loss(outputs, y, weights, hyperparameters["lambda"], len(layers))
 
-        if shuffle:
-            X, labels = unison_shuffle(X, labels)
+        print("->Error:", error, ", Loss", 0)
+
+    # perché fare lo shuffle alla fine?
+    if shuffle:
+        X, labels = unison_shuffle(X, labels)
 
 
 
@@ -70,17 +70,17 @@ def __forward_pass(x, weights: dict, layers):
     :return: tuple (output, cache). output is the prediction of our network, cahce is all weight in intermediate steps
     """
     forward_cache = {}  # here we will store status in forward pass
-    layer_input = np.array([x]).transpose()  # we don't update original values, the transpose is to match dimension
+    layer_input = x  # we don't update original values, the transpose is to match dimension
+    layer_output = []
 
     for layer in range(1, len(layers)):
-        W = weights['W' + str(layer)]  # retrieve corresponding weights
 
+        W = np.array(weights['W' + str(layer)])  # retrieve corresponding weights
         b = np.array(weights['b' + str(layer)])  # retrieve corresponding bias and do transpose
-
         activation = layers[layer]["activation"]  # retrieve corresponding activation function
 
-        # compute first linear activation of one layer
-        Z = np.dot(W, layer_input) + b  # multiply weight dot input adding bias
+        Z = layer_input@W.T + b.T  # multiply input matrix per weight matrix
+
         # compute the non-linear activation through that layer
         if activation == "sigmoid":
             layer_output = sigmoid(Z)
@@ -111,7 +111,6 @@ def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
         activation = layers[layer]["activation"]  # retrieve corresponding activation function
 
         output_previous = forward_cache['layer_output' + str(layer - 1)]
-
         activation_backward()
 
 

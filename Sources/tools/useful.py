@@ -11,7 +11,7 @@ def batch(X, y, n=1):
     """
     l = len(X)
     for ndx in range(0, l, n):
-        yield X[ndx:min(ndx + n, l)], y[ndx:min(ndx + n, l)]
+        yield np.array(X[ndx:min(ndx + n, l)]), np.array(y[ndx:min(ndx + n, l)])
 
 
 def unison_shuffle(X, y):

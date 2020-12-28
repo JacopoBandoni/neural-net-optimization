@@ -76,4 +76,6 @@ class ExtremeLearningMachine():
         pass
 
 
-
+# main used for test output
+if __name__ == "__main__":
+    print("Neural network tests: extreme learning")

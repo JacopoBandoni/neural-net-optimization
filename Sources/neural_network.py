@@ -1,8 +1,10 @@
 import numpy as np
 
 from Sources.solver.adam import adam
-from Sources.solver.cholesky import cholesky
+"from Sources.solver.cholesky import cholesky"
 from Sources.solver.steepest_gradient_descent import sgd
+from Sources.tools.activation_function import *
+from  Sources.tools.score_function import *
 
 
 class NeuralNetwork():
@@ -93,16 +95,41 @@ class NeuralNetwork():
         :param X: X: Test data where is computed output
         :return:
         """
-        pass
+
+        output = np.array(X)
+
+        for i in range(1, len(self.layers)):
+
+            if i != len(self.layers):
+                output = np.array(output) @ np.array(self.weights['W' + str(i)]).T + np.array(self.weights['b' + str(i)]).T
+
+            if self.layers[i]["activation"] == "sigmoid":
+                output = np.array([sigmoid(xi) for xi in output])
+            if self.layers[i]["activation"] == "tanh":
+                output = np.array([tanh(xi) for xi in output])
+
+        return output
 
     def score(self, X, labels):
         """
-
         :param X: test data where is computed output
         :param labels: target output where is computed scored function
-        :return:
+        :return: mean square error over the test set
         """
-        pass
+
+        output = np.array(X)
+
+        for i in range(1, len(self.layers)):
+
+            if i != len(self.layers):
+                output = np.array(output) @ np.array(self.weights['W' + str(i)]).T + np.array(self.weights['b' + str(i)]).T
+
+            if self.layers[i]["activation"] == "sigmoid":
+                output = sigmoid(output)
+            if self.layers[i]["activation"] == "tanh":
+                output = tanh(output)
+
+        return mean_squared_error(output.tolist(), labels)
 
     def plot_model(self):
         """
@@ -125,7 +152,7 @@ if __name__ == "__main__":
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(X[0]), "activation": "linear"},  # input only for dimension, insert linear
-                            {"neurons": 3, "activation": "sigmoid"},
+                            {"neurons": 4, "activation": "sigmoid"},
                             {"neurons": 4, "activation": "sigmoid"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
@@ -133,7 +160,7 @@ if __name__ == "__main__":
                         "problem": "classification"
                         })
 
-    nn.plot_model()
+    #nn.plot_model()
 
     hyperparameters = {
         "learning_rate": 0.001,

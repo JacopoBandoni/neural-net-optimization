@@ -40,8 +40,8 @@ def load_monk(version: int):
     names_train = []
     with open(path_train, 'r') as f:
         for line in f:
-            line = line.split()
 
+            line = line.split()
             y_train.append(int(line[0]))
             X_train.append(np.array(line[1:7]).astype(int))
             names_train.append(line[7])
@@ -55,10 +55,10 @@ def load_monk(version: int):
     names_test = []
     with open(path_test, 'r') as f:
         for line in f:
-            line = line.split()
 
-            y_test.append(line[0])
-            X_test.append(line[1:7])
+            line = line.split()
+            y_test.append(int(line[0]))
+            X_test.append(np.array(line[1:7]).astype(int))
             names_test.append(line[7])
 
     if len(X_train) != len(y_train):
