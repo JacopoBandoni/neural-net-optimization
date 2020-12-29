@@ -1,13 +1,15 @@
 import numpy as np
 
 from Sources.solver.adam import adam
-"from Sources.solver.cholesky import cholesky"
+from Sources.solver.cholesky import cholesky
 from Sources.solver.steepest_gradient_descent import sgd
 from Sources.tools.activation_function import *
-from  Sources.tools.score_function import *
+from Sources.tools.score_function import *
+from Sources.tools.preprocessing import one_hot
+from Sources.tools.load_dataset import *
 
 
-class NeuralNetwork():
+class NeuralNetwork:
     """
     Parameters mandatory inside the dictionary, recognized by the model are:
     seed = value 0. Used for test reproducibility
@@ -32,8 +34,8 @@ class NeuralNetwork():
 
         if "solver" in settings and \
                 (settings["solver"] == "sgd" or
-                 settings["solver"] == "cholesky" or
-                 settings["solver"] == "adam"):
+                 settings["solver"] == "adam" or
+                 settings["solver"] == "cholesky"):
             self.solver = settings["solver"]
         else:
             raise Exception("Activation function error")
@@ -51,14 +53,12 @@ class NeuralNetwork():
         self.weights = {}
 
         for i in range(1, len(self.layers)):
-            W_i = []
-            for neuron in range(self.layers[i]['neurons']):
-                W_i.append([np.random.uniform(-0.7, 0.7) for _ in range(self.layers[i - 1]['neurons'])])
+            self.weights['W' + str(i)] = 0.7 * np.random.uniform(-0.7, 0.7, (self.layers[i - 1]["neurons"],
+                                                                 self.layers[i]["neurons"]))
+            self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
-            self.weights['W' + str(i)] = W_i
-            self.weights['b' + str(i)] = np.zeros((self.layers[i]['neurons'], 1))
 
-    def fit(self, X, labels, hyperparameters: dict, epochs: int, batch_size: int, shuffle: bool):
+    def fit(self, X, labels, hyperparameters: dict, epochs=1, batch_size=2, shuffle=False):
         """
         :param X:
         :param labels:
@@ -76,16 +76,20 @@ class NeuralNetwork():
             raise Exception("Epoch number error")
 
         if self.solver == "sgd":
-            print("...Running sgd...")
+            print("\nRunning sgd")
             sgd(X, labels, self.weights, self.layers, self.problem, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "adam":
-            print("Running adam")
+            print("\nRunning adam")
             adam()
 
         elif self.solver == "cholesky":
-            print("Running cholesky")
-            cholesky()
+            print("\nRunning cholesky")
+
+            if self.layers[-1]["activation"] != "linear":
+                raise Exception("Per cholesky l'ultima funzione di attivazione deve mecessariamente essere lineare")
+
+            cholesky(X, labels, hyperparameters["lambda"], self.weights, self.layers)
 
         else:
             raise Exception("Wrong solver choice")
@@ -100,13 +104,12 @@ class NeuralNetwork():
 
         for i in range(1, len(self.layers)):
 
-            if i != len(self.layers):
-                output = np.array(output) @ np.array(self.weights['W' + str(i)]).T + np.array(self.weights['b' + str(i)]).T
+            output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
 
             if self.layers[i]["activation"] == "sigmoid":
-                output = np.array([sigmoid(xi) for xi in output])
+                output = sigmoid(output)
             if self.layers[i]["activation"] == "tanh":
-                output = np.array([tanh(xi) for xi in output])
+                output = tanh(output)
 
         return output
 
@@ -122,14 +125,14 @@ class NeuralNetwork():
         for i in range(1, len(self.layers)):
 
             if i != len(self.layers):
-                output = np.array(output) @ np.array(self.weights['W' + str(i)]).T + np.array(self.weights['b' + str(i)]).T
+                output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
 
             if self.layers[i]["activation"] == "sigmoid":
                 output = sigmoid(output)
             if self.layers[i]["activation"] == "tanh":
                 output = tanh(output)
 
-        return mean_squared_error(output.tolist(), labels)
+        return mean_squared_error(output, labels)
 
     def plot_model(self):
         """
@@ -146,29 +149,63 @@ class NeuralNetwork():
 if __name__ == "__main__":
     print("Neural network tests")
 
-    X = [[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]]
-    labels = [[1], [0], [0], [1], [1]]
+    X = ([[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]], [0, 0, 0, 1, 1])
+    Y = ([[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 1, 0], [1, 1, 1]], [0, 0, 1, 1, 1])
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
-                            {"neurons": len(X[0]), "activation": "linear"},  # input only for dimension, insert linear
-                            {"neurons": 4, "activation": "sigmoid"},
-                            {"neurons": 4, "activation": "sigmoid"},
-                            {"neurons": 1, "activation": "sigmoid"}  # output
+                            {"neurons": len(X[0][0]), "activation": "linear"},
+                            # input only for dimension, insert linear
+                            {"neurons": 10, "activation": "sigmoid"},
+                            {"neurons": 1, "activation": "linear"}  # output
                         ],
                         'solver': 'sgd',
                         "problem": "classification"
                         })
 
-    #nn.plot_model()
+    nn.fit(X=X[0], labels=[[i] for i in X[1]], hyperparameters={"lambda": 0.9, "stepsize": 0.5}, epochs=100)
 
-    hyperparameters = {
-        "learning_rate": 0.001,
-        "epsilon": 0.00001,
-        "lambda": 0.01
-    }
-    epochs = 5
-    batch_size = 2
-    shuffle = True
+    # print("\nPrediction")
+    # print(nn.predict(one_hot(X[0])).mean(axis=0))
+    # print(np.array([[i] for i in X[1]]).mean(axis=0))
 
-    nn.fit(X, labels, hyperparameters, epochs, batch_size, shuffle)
+    print("\nMean square error: train set")
+    print(nn.score(X=X[0], labels=[[i] for i in X[1]]))
+
+    print("\nMean square error: test set")
+    print(nn.score(X=Y[0], labels=[[i] for i in Y[1]]))
+
+    """X, Y = load_monk(2)
+
+    nn = NeuralNetwork({'seed': 0,
+                        'layers': [
+                            {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
+                            # input only for dimension, insert linear
+                            {"neurons": 3, "activation": "sigmoid"},
+                            {"neurons": 1, "activation": "linear"}  # output
+                        ],
+                        'solver': 'sgd',
+                        "problem": "classification"
+                        })
+
+    nn.fit(X=one_hot(X[0]), labels=[[i] for i in X[1]], hyperparameters={"lambda": 0.9}, epochs=1)
+
+    # print("\nPrediction")
+    # print(nn.predict(one_hot(X[0])).mean(axis=0))
+    # print(np.array([[i] for i in X[1]]).mean(axis=0))
+
+    print("\nMean square error: train set")
+    print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
+
+    print("\nMean square error: test set")
+    print(nn.score(X=one_hot(Y[0]), labels=[[i] for i in Y[1]]))
+
+    treshold_list_train = [1 if i > 0.5 else 0 for i in nn.predict(one_hot(X[0]))]
+
+    treshold_list_test = [1 if i > 0.5 else 0 for i in nn.predict(one_hot(Y[0]))]
+
+    print("\nClassification accuracy training set:")
+    print(classification_accuracy(output=treshold_list_train, target=X[1]))
+
+    print("\nClassification accuracy test set:")
+    print(classification_accuracy(output=treshold_list_test, target=Y[1]))"""

@@ -1,11 +1,11 @@
 import numpy as np
 
-from Sources.tools.activation_function import sigmoid, tanh
+from Sources.tools.activation_function import *
 from Sources.tools.score_function import mean_squared_loss, mean_squared_error, classification_accuracy
 from Sources.tools.useful import batch, unison_shuffle
 
 
-def sgd(X, labels, weights: dict, layers: dict, problem:str, hyperparameters:dict, epochs: int, batch_size: int,
+def sgd(X, labels, weights: dict, layers: dict, problem: str, hyperparameters: dict, epochs: int, batch_size: int,
         shuffle: bool):
     """
     Compute steepest gradient descent, either batch or stochastic
@@ -25,40 +25,28 @@ def sgd(X, labels, weights: dict, layers: dict, problem:str, hyperparameters:dic
 
     errors = []
 
-    """
-    NOTE I can probably remove the accuracy, it's needed at the end not at each epoch
-    if problem == "classification":
-        tresholed_output = [[]]
-        accuracy = 0"""
-
     for i in range(0, epochs):
+        # TODO -> sistemare batch ritorna un botto di roba
+        # for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
-        for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
+        # forward propagatiom
+        output, forward_cache = __forward_pass(X, weights, layers)
 
-            # forward propagatiom
-            output, forward_cache = __forward_pass(Xi, weights, layers)
+        error = mean_squared_error(output, labels)
+        errors.append(error)
 
-            """ 
-            NOTE I can probably remove the accuracy, it's needed at the end not at each epoch
-            # round results based on problem choose
-            if problem == "classification": # if it's classification round based on output
-                tresholed_output = [0 if o < 0.5 else 1 for o in output]
-                accuracy = classification_accuracy(tresholed_output, Yi)"""
+        # backward propagation
+        deltaW = __backward_pass(output, np.array(labels).mean(axis=0, keepdims=True), weights, forward_cache, layers)
 
-            error = mean_squared_error(output, Yi)
-            errors.append(error)
+        for j in range(1, len(layers)):
+            if j == 2:
+                weights["W" + str(j)] += hyperparameters["stepsize"] * deltaW["W" + str(j)].T
 
-            # backward propagation
-
-        # perchè calcolare la loss ad ogni epoch? La loss ci serve per allenare e basta
-        #loss = mean_squared_loss(outputs, y, weights, hyperparameters["lambda"], len(layers))
-
-        print("->Error:", error, ", Loss", 0)
+        print("\n->Error:", error)
 
     # perché fare lo shuffle alla fine?
     if shuffle:
         X, labels = unison_shuffle(X, labels)
-
 
 
 def __forward_pass(x, weights: dict, layers):
@@ -69,59 +57,100 @@ def __forward_pass(x, weights: dict, layers):
     :param layers: layers configuration of our network
     :return: tuple (output, cache). output is the prediction of our network, cahce is all weight in intermediate steps
     """
-    forward_cache = {}  # here we will store status in forward pass
-    layer_input = x  # we don't update original values, the transpose is to match dimension
-    layer_output = []
 
-    for layer in range(1, len(layers)):
+    output = np.array(x)
 
-        W = np.array(weights['W' + str(layer)])  # retrieve corresponding weights
-        b = np.array(weights['b' + str(layer)])  # retrieve corresponding bias and do transpose
-        activation = layers[layer]["activation"]  # retrieve corresponding activation function
+    forward_cache = {"output0": output.mean(axis=0, keepdims=True)}
 
-        Z = layer_input@W.T + b.T  # multiply input matrix per weight matrix
+    for i in range(1, len(layers)):
 
-        # compute the non-linear activation through that layer
-        if activation == "sigmoid":
-            layer_output = sigmoid(Z)
-        elif activation == "tanh":
-            layer_output = tanh(Z)
+        output = output @ weights['W' + str(i)] + weights['b' + str(i)]
+
+        forward_cache["net" + str(i)] = output.mean(axis=0, keepdims=True)
+
+        if layers[i]["activation"] == "sigmoid":
+            output = sigmoid(output)
+        elif layers[i]["activation"] == "tanh":
+            output = tanh(output)
+        elif layers[i]["activation"] == "linear":
+            pass
         else:
             raise Exception("Activation function not recognized")
 
-        # store status
-        forward_cache['Z' + str(layer)] = Z
-        forward_cache['layer_output' + str(layer - 1)] = layer_input
+        forward_cache["output" + str(i)] = output.mean(axis=0, keepdims=True)
 
-        layer_input = layer_output  # update input to feed the next layer
-
-    return layer_output, forward_cache
+    return output, forward_cache
 
 
 def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
-    grads = {}
-    number_of_layer = len(layers)
+    delta_i = 0.0
+    delta_next = []
+    delta_prev = []
+    deltaW = {}
 
-    labels = np.array(labels)
-    y = labels.reshape(output.shape)  # labels are not same shape as output to match dimensions
+    for layer in reversed(range(1, len(layers))):  # start from last layer
 
-    for layer in reversed(range(1, number_of_layer)):  # start from last layer
-        W = weights['W ' + str(layer)]  # retrieve corresponding weights
-        b = weights['b ' + str(layer)]  # retrieve corresponding bias
-        activation = layers[layer]["activation"]  # retrieve corresponding activation function
+        # compute deltaW for external layer
+        if layer == len(layers) - 1:
 
-        output_previous = forward_cache['layer_output' + str(layer - 1)]
-        activation_backward()
+            for i in range(0, layers[layer]["neurons"]):
 
+                # compute (yi - oi)
+                delta_i = labels[i] - forward_cache['output' + str(layer)][0][i]
 
-def __activation_backward(activation):
-    if activation == "simoid":
-        Z_derivative = 0
-    elif activation == "tanh":
-        pass
-    else:
-        raise Exception("Activation function not recognized")
+                print("\nlabels = " + str(labels[i]))
+                print("output = " + str(forward_cache['output' + str(layer)][0][i]))
+                print("label - output = " + str(delta_i))
+
+                # compute (yi - oi)f'(neti)
+                delta_i = delta_i * apply_d_activation(layers[layer]["activation"],
+                                                       forward_cache['net' + str(layer)][0][i])
+
+                print("delta" + str(i) + " = " + str(delta_i))
+
+                # add delta to the list of delta's last layer
+                delta_next.insert(0, delta_i)
+
+            deltaW["W" + str(layer)] = np.array(delta_next) @ forward_cache['output' + str(layer - 1)]
+
+        # compute deltaW for hidden layer
+        else:
+            for i in range(0, layers[layer]["neurons"]):
+
+                delta_i = 0
+
+                for j in range(0, layers[layer + 1]["neurons"]):
+                    # compute sum( w*delta )
+                    delta_i += weights["W" + str(layer + 1)][i, :] @ np.array(delta_next).T
+
+                # compute sum( w*delta ) * f'(net)
+                delta_i = delta_i * apply_d_activation(layers[layer]["activation"],
+                                                       forward_cache['net' + str(layer)][0][i])
+                # add delta to the list of delta_prev
+                delta_prev.insert(0, delta_i)
+
+            deltaW["W" + str(layer)] = np.array(delta_prev) @ forward_cache['output' + str(layer - 1)]
+
+            delta_next = delta_prev
+            delta_prev = []
+
+    return deltaW
 
 
 if __name__ == "__main__":
     print("Steepest gradient descent test")
+
+    weights = {}
+    X = ([[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]], [0, 0, 0, 1, 1])
+
+    weights['W1'] = 0.7 * np.random.uniform(-0.7, 0.7, (3, 3))
+    weights['b1'] = np.zeros((3, 1))
+
+    weights['W2'] = 0.7 * np.random.uniform(-0.7, 0.7, (3, 1))
+    weights['b2'] = np.zeros((1, 1))
+
+    print(np.array(X[0]).mean(axis=0, keepdims=1))
+
+    print(d_sigmoid(0.6))
+
+    print( 0.23710834427459193 == 0.23710834427459193)

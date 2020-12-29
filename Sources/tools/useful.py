@@ -10,7 +10,9 @@ def batch(X, y, n=1):
     :return: tuple of X,y in batch
     """
     l = len(X)
+    print(X)
     for ndx in range(0, l, n):
+        print(ndx)
         yield np.array(X[ndx:min(ndx + n, l)]), np.array(y[ndx:min(ndx + n, l)])
 
 
