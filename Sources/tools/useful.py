@@ -2,18 +2,17 @@ import numpy as np
 import random
 
 
-def batch(X, y, n=1):
+def batch(X, Y, n=1):
     """
     Method to return batches over X and y vector
-    :param iterable: Any vector
+    :param X: Any vector
+    :param Y: Any vector
     :param n: how many batches
-    :return: tuple of X,y in batch
+    :return: tuple of X,Y in batch
     """
     l = len(X)
-    print(X)
     for ndx in range(0, l, n):
-        print(ndx)
-        yield np.array(X[ndx:min(ndx + n, l)]), np.array(y[ndx:min(ndx + n, l)])
+        yield np.array(X[ndx:min(ndx + n, l)]), np.array(Y[ndx:min(ndx + n, l)])
 
 
 def unison_shuffle(X, y):

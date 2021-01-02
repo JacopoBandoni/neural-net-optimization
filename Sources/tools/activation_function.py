@@ -22,12 +22,22 @@ def tanh(x):
 
 def d_tanh(x):
     x = np.array(x)
-    result = 1-(tanh(x)**2)
+    result = 1 - (tanh(x) ** 2)
     return result
 
 
-def apply_d_activation(activation, v):
+def apply_activation(activation, v):
+    if activation == "sigmoid":
+        return sigmoid(v)
+    elif activation == "tanh":
+        return tanh(v)
+    elif activation == "linear":
+        return 1
+    else:
+        raise Exception("Activation function not recognized")
 
+
+def apply_d_activation(activation, v):
     if activation == "sigmoid":
         return d_sigmoid(v)
     elif activation == "tanh":

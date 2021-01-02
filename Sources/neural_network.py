@@ -54,9 +54,8 @@ class NeuralNetwork:
 
         for i in range(1, len(self.layers)):
             self.weights['W' + str(i)] = 0.7 * np.random.uniform(-0.7, 0.7, (self.layers[i - 1]["neurons"],
-                                                                 self.layers[i]["neurons"]))
+                                                                             self.layers[i]["neurons"]))
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
-
 
     def fit(self, X, labels, hyperparameters: dict, epochs=1, batch_size=2, shuffle=False):
         """
@@ -77,7 +76,7 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            sgd(X, labels, self.weights, self.layers, self.problem, hyperparameters, epochs, batch_size, shuffle)
+            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size)
 
         elif self.solver == "adam":
             print("\nRunning adam")
@@ -157,14 +156,14 @@ if __name__ == "__main__":
                         'layers': [
                             {"neurons": len(X[0][0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 10, "activation": "sigmoid"},
+                            {"neurons": 6, "activation": "sigmoid"},
                             {"neurons": 2, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd',
                         "problem": "classification"
                         })
 
-    nn.fit(X=X[0], labels=X[1], hyperparameters={"lambda": 0.9, "stepsize": 1}, epochs=20)
+    nn.fit(X=X[0], labels=X[1], hyperparameters={"lambda": 0, "stepsize": 1, "momentum": 0.9, "epsilon": 0.001}, epochs=1000)
 
     # print("\nPrediction")
     # print(nn.predict(one_hot(X[0])).mean(axis=0))
@@ -177,13 +176,13 @@ if __name__ == "__main__":
     print(nn.score(X=Y[0], labels=Y[1]))
 
     """
-    X, Y = load_monk(3)
+    X, Y = load_monk(2)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 6, "activation": "sigmoid"},
+                            {"neurons": 5, "activation": "sigmoid"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd',
@@ -192,12 +191,8 @@ if __name__ == "__main__":
 
     nn.fit(X=one_hot(X[0]),
            labels=[[i] for i in X[1]],
-           hyperparameters={"lambda": 0, "stepsize": 1, "momentum": 0.9},
-           epochs=2000)
-
-    # print("\nPrediction")
-    # print(nn.predict(one_hot(X[0])).mean(axis=0))
-    # print(np.array([[i] for i in X[1]]).mean(axis=0))
+           hyperparameters={"lambda": 0, "stepsize": 0.5, "momentum": 1, "epsilon": 0.001},
+           epochs=20000)
 
     print("\nMean square error: train set")
     print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
