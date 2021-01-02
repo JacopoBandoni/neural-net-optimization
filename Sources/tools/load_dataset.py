@@ -21,16 +21,16 @@ def load_monk(version: int):
     """
     if version == 1:
         print("Loading monk 1 dataset")
-        path_train = '../Data/monks-1.train'
-        path_test = '../Data/monks-1.test'
+        path_train = './Data/monks-1.train'
+        path_test = './Data/monks-1.test'
     elif version == 2:
         print("Loading monk 2 dataset")
-        path_train = '../Data/monks-2.train'
-        path_test = '../Data/monks-2.test'
+        path_train = './Data/monks-2.train'
+        path_test = './Data/monks-2.test'
     elif version == 3:
         print("Loading monk 3 dataset")
-        path_train = '../Data/monks-3.train'
-        path_test = '../Data/monks-3.test'
+        path_train = './Data/monks-3.train'
+        path_test = './Data/monks-3.test'
     else:
         raise Exception("This monk version doesn't exist")
 
