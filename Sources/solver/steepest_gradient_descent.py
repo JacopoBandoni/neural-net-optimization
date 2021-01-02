@@ -6,7 +6,7 @@ from Sources.tools.score_function import mean_squared_loss, mean_squared_error
 from Sources.tools.useful import batch, unison_shuffle
 
 
-def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int):
+def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int, shuffle: bool):
     """
     Compute steepest gradient descent, either batch or stochastic
     :param X: Our whole training data
@@ -52,6 +52,9 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
         if error <= hyperparameters["epsilon"]:
             print("\nStopping condition raggiunta:\nerrore = " + str(error))
             break
+
+        if shuffle:
+            X, labels = unison_shuffle(X, labels)
 
         print("\nEpoch number " + str(i) + "\n->Error:", error)
 

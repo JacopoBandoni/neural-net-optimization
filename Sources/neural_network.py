@@ -76,11 +76,11 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size)
+            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "adam":
             print("\nRunning adam")
-            adam()
+            adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "cholesky":
             print("\nRunning cholesky")
@@ -176,23 +176,25 @@ if __name__ == "__main__":
     print(nn.score(X=Y[0], labels=Y[1]))
 
     """
-    X, Y = load_monk(2)
+    """
+    X, Y = load_monk(3)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 5, "activation": "sigmoid"},
+                            {"neurons": 6, "activation": "sigmoid"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
-                        'solver': 'sgd',
+                        'solver': 'adam',
                         "problem": "classification"
                         })
 
     nn.fit(X=one_hot(X[0]),
            labels=[[i] for i in X[1]],
-           hyperparameters={"lambda": 0, "stepsize": 0.5, "momentum": 1, "epsilon": 0.001},
-           epochs=20000)
+           hyperparameters={"lambda": 0.0002, "stepsize": 0.001, "momentum": 1, "epsilon": 0.001},
+           epochs=5000,
+           batch_size=8)
 
     print("\nMean square error: train set")
     print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
@@ -208,4 +210,31 @@ if __name__ == "__main__":
     print(classification_accuracy(output=treshold_list_train, target=X[1]))
 
     print("\nClassification accuracy test set:")
-    print(classification_accuracy(output=treshold_list_test, target=Y[1]))
+    print(classification_accuracy(output=treshold_list_test, target=Y[1]))"""
+
+    X, Y = load_cup20()
+
+    print(X[0])
+
+    nn = NeuralNetwork({'seed': 0,
+                        'layers': [
+                            {"neurons": len(X[0][0]), "activation": "linear"},
+                            # input only for dimension, insert linear
+                            {"neurons": 6, "activation": "sigmoid"},
+                            {"neurons": 1, "activation": "sigmoid"}  # output
+                        ],
+                        'solver': 'adam',
+                        "problem": "classification"
+                        })
+
+    nn.fit(X=X[0],
+           labels=X[1],
+           hyperparameters={"lambda": 0.0002, "stepsize": 0.001, "momentum": 1, "epsilon": 0.001},
+           epochs=5000,
+           batch_size=8)
+
+    print("\nMean square error: train set")
+    print(nn.score(X=X[0], labels=X[1]))
+
+    print("\nMean square error: test set")
+    print(nn.score(X=Y[0], labels=Y[1]))
