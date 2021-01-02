@@ -24,6 +24,7 @@ def sgd(X, labels, weights: dict, layers: dict, problem: str, hyperparameters: d
     """
 
     errors = []
+    deltaW_old = {}
 
     for i in range(0, epochs):
         # TODO -> sistemare batch ritorna un botto di roba
@@ -36,17 +37,19 @@ def sgd(X, labels, weights: dict, layers: dict, problem: str, hyperparameters: d
         errors.append(error)
 
         # backward propagation
-        deltaW = __backward_pass(output, np.array(labels).mean(axis=0, keepdims=True), weights, forward_cache, layers)
+        deltaW = __backward_pass(output, np.array(labels), weights, forward_cache, layers)
 
+        # adjusting weigths
         for j in range(1, len(layers)):
-            if j == 2:
-                weights["W" + str(j)] += hyperparameters["stepsize"] * deltaW["W" + str(j)].T
+            weights["W" + str(j)] += hyperparameters["stepsize"] * deltaW["W" + str(j)] - \
+                                     hyperparameters["lambda"]*weights["W" + str(j)]\
+
+            if i != 0:
+                weights["W" + str(j)] += hyperparameters["momentum"]*deltaW_old["W" + str(j)]
+
+        deltaW_old = deltaW
 
         print("\n->Error:", error)
-
-    # perché fare lo shuffle alla fine?
-    if shuffle:
-        X, labels = unison_shuffle(X, labels)
 
 
 def __forward_pass(x, weights: dict, layers):
@@ -59,14 +62,13 @@ def __forward_pass(x, weights: dict, layers):
     """
 
     output = np.array(x)
-
-    forward_cache = {"output0": output.mean(axis=0, keepdims=True)}
+    forward_cache = {"output0": output}
 
     for i in range(1, len(layers)):
 
         output = output @ weights['W' + str(i)] + weights['b' + str(i)]
 
-        forward_cache["net" + str(i)] = output.mean(axis=0, keepdims=True)
+        forward_cache["net" + str(i)] = output
 
         if layers[i]["activation"] == "sigmoid":
             output = sigmoid(output)
@@ -77,62 +79,68 @@ def __forward_pass(x, weights: dict, layers):
         else:
             raise Exception("Activation function not recognized")
 
-        forward_cache["output" + str(i)] = output.mean(axis=0, keepdims=True)
+        forward_cache["output" + str(i)] = output
 
     return output, forward_cache
 
 
+# TODO SBAGLIATO CAMBIARE, AGGIORNAMENTO SBAGLIATO!!!!
 def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
-    delta_i = 0.0
-    delta_next = []
+    delta_i = 0
     delta_prev = []
+    delta_next = []
     deltaW = {}
 
     for layer in reversed(range(1, len(layers))):  # start from last layer
 
+        deltaW["W" + str(layer)] = []
+
         # compute deltaW for external layer
         if layer == len(layers) - 1:
 
+            # compute the vector of deltaW for each neuron in output
             for i in range(0, layers[layer]["neurons"]):
 
-                # compute (yi - oi)
-                delta_i = labels[i] - forward_cache['output' + str(layer)][0][i]
+                # compute (yi - oi) for each pattern #TODO sottrazione tra vettori si può fare!
+                delta_i = labels[:, i] - forward_cache["output" + str(layer)][:, i]
 
-                print("\nlabels = " + str(labels[i]))
-                print("output = " + str(forward_cache['output' + str(layer)][0][i]))
-                print("label - output = " + str(delta_i))
+                # compute delta_i = (yi - oi)f'(neti) for each pattern
+                # (TODO sostituibile come sotto come molt di matrici (*) element-wise)
+                for j in range(0, len(output)):
+                    delta_i[j] = delta_i[j] * apply_d_activation(layers[layer]["activation"],
+                                                                 forward_cache['net' + str(layer)][j][i])
 
-                # compute (yi - oi)f'(neti)
-                delta_i = delta_i * apply_d_activation(layers[layer]["activation"],
-                                                       forward_cache['net' + str(layer)][0][i])
+                delta_next.append(delta_i)
 
-                print("delta" + str(i) + " = " + str(delta_i))
+                # compute oj(yi - oi)f'(neti) for each pattern and do the mean on all the pattern
+                deltaW["W" + str(layer)].append(
+                    (np.array(forward_cache['output' + str(layer - 1)] * np.array([delta_i]).T))
+                    .mean(axis=0).tolist())
 
-                # add delta to the list of delta's last layer
-                delta_next.insert(0, delta_i)
-
-            deltaW["W" + str(layer)] = np.array(delta_next) @ forward_cache['output' + str(layer - 1)]
+            deltaW["W" + str(layer)] = np.array(deltaW["W" + str(layer)]).T
 
         # compute deltaW for hidden layer
         else:
+
+            # compute the vector of deltaW for each neuron in the hidden layer
             for i in range(0, layers[layer]["neurons"]):
 
-                delta_i = 0
+                # compute sum( w*delta ) for each pattern (delta next is made of all the pattern)
+                delta_i = weights["W" + str(layer + 1)][[i], :] @ np.array(delta_next)
 
-                for j in range(0, layers[layer + 1]["neurons"]):
-                    # compute sum( w*delta )
-                    delta_i += weights["W" + str(layer + 1)][i, :] @ np.array(delta_next).T
-
-                # compute sum( w*delta ) * f'(net)
+                # compute sum( w*delta ) * f'(net) for each pattern
                 delta_i = delta_i * apply_d_activation(layers[layer]["activation"],
-                                                       forward_cache['net' + str(layer)][0][i])
-                # add delta to the list of delta_prev
-                delta_prev.insert(0, delta_i)
+                                                       forward_cache['net' + str(layer)][:, [i]].T)
 
-            deltaW["W" + str(layer)] = np.array(delta_prev) @ forward_cache['output' + str(layer - 1)]
+                delta_prev.append(delta_i[0].tolist())
+
+                # compute o * sum( w*delta ) * f'(net) for each pattern and do the mean
+                deltaW["W" + str(layer)].append((np.array(forward_cache['output' + str(layer - 1)] * delta_i.T))
+                                                .mean(axis=0).tolist())
 
             delta_next = delta_prev
             delta_prev = []
+            deltaW["W" + str(layer)] = np.array(deltaW["W" + str(layer)]).T
 
     return deltaW
 
@@ -149,8 +157,10 @@ if __name__ == "__main__":
     weights['W2'] = 0.7 * np.random.uniform(-0.7, 0.7, (3, 1))
     weights['b2'] = np.zeros((1, 1))
 
-    print(np.array(X[0]).mean(axis=0, keepdims=1))
+    Y = np.array([[1, 2, 1, 3]])
+    Y2 = np.array([1, 1])
 
-    print(d_sigmoid(0.6))
-
-    print( 0.23710834427459193 == 0.23710834427459193)
+    print(Y)
+    print(Y.shape)
+    print(Y[0])
+    print(Y[0].shape)

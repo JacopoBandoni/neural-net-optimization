@@ -149,46 +149,51 @@ class NeuralNetwork:
 if __name__ == "__main__":
     print("Neural network tests")
 
-    X = ([[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]], [0, 0, 0, 1, 1])
-    Y = ([[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 1, 0], [1, 1, 1]], [0, 0, 1, 1, 1])
+    """
+    X = ([[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]], [[0, 0], [0, 0], [0, 0], [1, 0], [1, 1]])
+    Y = ([[0, 0, 0], [0, 1, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]], [[0, 0], [0, 0], [1, 0], [0, 1], [1, 1]])
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(X[0][0]), "activation": "linear"},
                             # input only for dimension, insert linear
                             {"neurons": 10, "activation": "sigmoid"},
-                            {"neurons": 1, "activation": "linear"}  # output
+                            {"neurons": 2, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd',
                         "problem": "classification"
                         })
 
-    nn.fit(X=X[0], labels=[[i] for i in X[1]], hyperparameters={"lambda": 0.9, "stepsize": 0.5}, epochs=100)
+    nn.fit(X=X[0], labels=X[1], hyperparameters={"lambda": 0.9, "stepsize": 1}, epochs=20)
 
     # print("\nPrediction")
     # print(nn.predict(one_hot(X[0])).mean(axis=0))
     # print(np.array([[i] for i in X[1]]).mean(axis=0))
 
     print("\nMean square error: train set")
-    print(nn.score(X=X[0], labels=[[i] for i in X[1]]))
+    print(nn.score(X=X[0], labels=X[1]))
 
     print("\nMean square error: test set")
-    print(nn.score(X=Y[0], labels=[[i] for i in Y[1]]))
+    print(nn.score(X=Y[0], labels=Y[1]))
 
-    """X, Y = load_monk(2)
+    """
+    X, Y = load_monk(3)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 3, "activation": "sigmoid"},
-                            {"neurons": 1, "activation": "linear"}  # output
+                            {"neurons": 6, "activation": "sigmoid"},
+                            {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
                         'solver': 'sgd',
                         "problem": "classification"
                         })
 
-    nn.fit(X=one_hot(X[0]), labels=[[i] for i in X[1]], hyperparameters={"lambda": 0.9}, epochs=1)
+    nn.fit(X=one_hot(X[0]),
+           labels=[[i] for i in X[1]],
+           hyperparameters={"lambda": 0, "stepsize": 1, "momentum": 0.9},
+           epochs=2000)
 
     # print("\nPrediction")
     # print(nn.predict(one_hot(X[0])).mean(axis=0))
@@ -208,4 +213,4 @@ if __name__ == "__main__":
     print(classification_accuracy(output=treshold_list_train, target=X[1]))
 
     print("\nClassification accuracy test set:")
-    print(classification_accuracy(output=treshold_list_test, target=Y[1]))"""
+    print(classification_accuracy(output=treshold_list_test, target=Y[1]))
