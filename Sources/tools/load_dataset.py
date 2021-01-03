@@ -1,4 +1,5 @@
 import numpy as np
+import csv
 
 
 def load_monk(version: int):
@@ -40,7 +41,6 @@ def load_monk(version: int):
     names_train = []
     with open(path_train, 'r') as f:
         for line in f:
-
             line = line.split()
             y_train.append(int(line[0]))
             X_train.append(np.array(line[1:7]).astype(int))
@@ -55,7 +55,6 @@ def load_monk(version: int):
     names_test = []
     with open(path_test, 'r') as f:
         for line in f:
-
             line = line.split()
             y_test.append(int(line[0]))
             X_test.append(np.array(line[1:7]).astype(int))
@@ -70,13 +69,43 @@ def load_monk(version: int):
 
 def load_cup20():
     print("Loading cup dataset")
-    pass
+
+    # load train data
+    X_train = []
+    y_train = []
+    names_train = []
+    with open('./Data/ML-CUP20-TR.csv', 'r') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for line_count, row in enumerate(csv_reader):
+            if line_count < 7:
+                pass  # here is row where is stored description of dataset
+            else:
+                names_train.append(int(row[0]))
+                X_train.append(np.array(row[1:11]).astype(float))
+                y_train.append(np.array(row[11:]).astype(float))
+
+    if len(X_train) != len(y_train):
+        raise Exception("Train Loading error")
+
+    # load test data
+    X_test = []
+    names_test = []
+    with open('./Data/ML-CUP20-TS.csv', 'r') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for line_count, row in enumerate(csv_reader):
+            if line_count < 7:
+                pass  # here is row where is stored description of dataset
+            else:
+                names_test.append(int(row[0]))
+                X_test.append(np.array(row[1:11]).astype(float))
+                # no labels
+
+    print("Training data:", len(X_train), ", Test data:", len(X_test))
+    return (X_train, y_train, names_train), (X_test, names_test)
 
 
 # main used for test output
 if __name__ == "__main__":
     print("Load dataset test")
 
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
-
-    print(X_train)
+    load_cup20()
