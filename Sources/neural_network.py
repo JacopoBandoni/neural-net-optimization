@@ -7,6 +7,7 @@ from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
 from Sources.tools.preprocessing import one_hot
 from Sources.tools.load_dataset import *
+from Sources.tools.weight_initialization import xavier_init
 
 
 class NeuralNetwork:
@@ -53,11 +54,12 @@ class NeuralNetwork:
         self.weights = {}
 
         for i in range(1, len(self.layers)):
-            self.weights['W' + str(i)] = 0.7 * np.random.uniform(-0.7, 0.7, (self.layers[i - 1]["neurons"],
-                                                                             self.layers[i]["neurons"]))
+            self.weights['W' + str(i)] = xavier_init((self.layers[i - 1]["neurons"], self.layers[i]["neurons"]),
+                                                     self.layers[0]["neurons"], self.layers[-1]["neurons"])
+
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
-    def fit(self, X, labels, hyperparameters: dict, epochs=1, batch_size=2, shuffle=False):
+    def fit(self, X, labels, hyperparameters: dict, epochs=1, batch_size=32, shuffle=True):
         """
         :param X:
         :param labels:
@@ -176,15 +178,20 @@ if __name__ == "__main__":
     print(nn.score(X=Y[0], labels=Y[1]))
 
     """
-    """
-    X, Y = load_monk(3)
+
+    X, Y = load_monk(2)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 6, "activation": "sigmoid"},
-                            {"neurons": 1, "activation": "sigmoid"}  # output
+                            {"neurons": 15, "activation": "tanh"},
+                            {"neurons": 12, "activation": "tanh"},
+                            {"neurons": 8, "activation": "tanh"},
+                            {"neurons": 6, "activation": "tanh"},
+                            {"neurons": 3, "activation": "tanh"},
+                            {"neurons": 2, "activation": "tanh"},
+                            {"neurons": 1, "activation": "tanh"}  # output
                         ],
                         'solver': 'adam',
                         "problem": "classification"
@@ -192,9 +199,9 @@ if __name__ == "__main__":
 
     nn.fit(X=one_hot(X[0]),
            labels=[[i] for i in X[1]],
-           hyperparameters={"lambda": 0.0002, "stepsize": 0.001, "momentum": 1, "epsilon": 0.001},
-           epochs=5000,
-           batch_size=8)
+           hyperparameters={"lambda": 0.0003, "stepsize": 0.001, "momentum": 0.9, "epsilon": 0.009},
+           epochs=2000,
+           batch_size=32)
 
     print("\nMean square error: train set")
     print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
@@ -210,7 +217,8 @@ if __name__ == "__main__":
     print(classification_accuracy(output=treshold_list_train, target=X[1]))
 
     print("\nClassification accuracy test set:")
-    print(classification_accuracy(output=treshold_list_test, target=Y[1]))"""
+    print(classification_accuracy(output=treshold_list_test, target=Y[1]))
+    """
 
     X, Y = load_cup20()
 
@@ -237,4 +245,4 @@ if __name__ == "__main__":
     print(nn.score(X=X[0], labels=X[1]))
 
     print("\nMean square error: test set")
-    print(nn.score(X=Y[0], labels=Y[1]))
+    print(nn.score(X=Y[0], labels=Y[1]))"""

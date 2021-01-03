@@ -25,6 +25,7 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
 
     errors = []
     deltaW_old = {}
+    deltab_old = {}
 
     for i in range(0, max_epochs):
 
@@ -34,16 +35,21 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
             output, forward_cache = __forward_pass(Xi, weights, layers, True)
 
             # backward propagation
-            deltaW = __backward_pass(output, np.array(Yi), weights, forward_cache, layers)
+            deltaW, deltab = __backward_pass(output, np.array(Yi), weights, forward_cache, layers)
 
             # adjusting weigths
             for j in range(1, len(layers)):
-                weights["W" + str(j)] += hyperparameters["stepsize"] * deltaW["W" + str(j)] - \
+                weights["W" + str(j)] += (hyperparameters["stepsize"]/len(Xi)) * deltaW["W" + str(j)] - \
                                          hyperparameters["lambda"] * weights["W" + str(j)]
+
+                weights["b" + str(j)] += (hyperparameters["stepsize"]/len(Xi)) * deltab["b" + str(j)]
+
                 if i != 0:
                     weights["W" + str(j)] += hyperparameters["momentum"] * deltaW_old["W" + str(j)]
+                    weights["b" + str(j)] += (hyperparameters["stepsize"] / len(Xi)) * deltab_old["b" + str(j)]
 
             deltaW_old = deltaW
+            deltab_old = deltab
 
         output = __forward_pass(X, weights, layers, False)
         error = mean_squared_error(output, labels)

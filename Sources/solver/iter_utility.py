@@ -38,10 +38,12 @@ def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
     delta_prev = []
     delta_next = []
     deltaW = {}
+    deltab = {}
 
     for layer in reversed(range(1, len(layers))):  # start from last layer
 
         deltaW["W" + str(layer)] = []
+        deltab["b" + str(layer)] = []
 
         # compute deltaW for external layer
         if layer == len(layers) - 1:
@@ -57,11 +59,15 @@ def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
 
                 delta_next.append(delta_i[0].tolist())
 
+                # compute delta b for the i-th neuron in output
+                deltab["b" + str(layer)].append(delta_i.T.mean(axis=0).tolist())
+
                 # compute oj(yi - oi)f'(neti) for each pattern and do the mean on all the pattern
                 deltaW["W" + str(layer)].append((np.array(forward_cache['output' + str(layer - 1)]) * delta_i.T)
                                                 .mean(axis=0).tolist())
 
             deltaW["W" + str(layer)] = np.array(deltaW["W" + str(layer)]).T
+            deltab["b" + str(layer)] = np.array(deltab["b" + str(layer)]).T
 
         # compute deltaW for hidden layer
         else:
@@ -77,12 +83,16 @@ def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
 
                 delta_prev.append(delta_i[0].tolist())
 
+                # compute delta b for the i-th neuron in output
+                deltab["b" + str(layer)].append(delta_i.T.mean(axis=0).tolist())
+
                 # compute o * sum( w*delta ) * f'(net) for each pattern and do the mean
                 deltaW["W" + str(layer)].append((np.array(forward_cache['output' + str(layer - 1)]) * delta_i.T)
                                                 .mean(axis=0).tolist())
 
             delta_next = delta_prev
             delta_prev = []
+            deltab["b" + str(layer)] = np.array(deltab["b" + str(layer)]).T
             deltaW["W" + str(layer)] = np.array(deltaW["W" + str(layer)]).T
 
-    return deltaW
+    return deltaW, deltab
