@@ -2,6 +2,7 @@ import numpy as np
 
 from Sources.solver.adam import adam
 from Sources.solver.cholesky import cholesky
+from Sources.solver.extreme_adam import extreme_adam
 from Sources.solver.steepest_gradient_descent import sgd
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
@@ -36,10 +37,11 @@ class NeuralNetwork:
         if "solver" in settings and \
                 (settings["solver"] == "sgd" or
                  settings["solver"] == "adam" or
+                 settings["solver"] == "extreme_adam" or
                  settings["solver"] == "cholesky"):
             self.solver = settings["solver"]
         else:
-            raise Exception("Activation function error")
+            raise Exception("Solver error")
 
         if "problem" in settings and settings["problem"] == "classification" or settings["problem"] == "regression":
             self.problem = settings["problem"]
@@ -83,6 +85,10 @@ class NeuralNetwork:
         elif self.solver == "adam":
             print("\nRunning adam")
             adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
+
+        elif self.solver == "extreme_adam":
+            print("\nRunning extreme adam")
+            extreme_adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "cholesky":
             print("\nRunning cholesky")
@@ -185,15 +191,10 @@ if __name__ == "__main__":
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 15, "activation": "tanh"},
-                            {"neurons": 12, "activation": "tanh"},
-                            {"neurons": 8, "activation": "tanh"},
-                            {"neurons": 6, "activation": "tanh"},
-                            {"neurons": 3, "activation": "tanh"},
                             {"neurons": 2, "activation": "tanh"},
-                            {"neurons": 1, "activation": "tanh"}  # output
+                            {"neurons": 1, "activation": "linear"}  # output
                         ],
-                        'solver': 'adam',
+                        'solver': 'extreme_adam',
                         "problem": "classification"
                         })
 
@@ -218,31 +219,4 @@ if __name__ == "__main__":
 
     print("\nClassification accuracy test set:")
     print(classification_accuracy(output=treshold_list_test, target=Y[1]))
-    """
 
-    X, Y = load_cup20()
-
-    print(X[0])
-
-    nn = NeuralNetwork({'seed': 0,
-                        'layers': [
-                            {"neurons": len(X[0][0]), "activation": "linear"},
-                            # input only for dimension, insert linear
-                            {"neurons": 6, "activation": "sigmoid"},
-                            {"neurons": 1, "activation": "sigmoid"}  # output
-                        ],
-                        'solver': 'adam',
-                        "problem": "classification"
-                        })
-
-    nn.fit(X=X[0],
-           labels=X[1],
-           hyperparameters={"lambda": 0.0002, "stepsize": 0.001, "momentum": 1, "epsilon": 0.001},
-           epochs=5000,
-           batch_size=8)
-
-    print("\nMean square error: train set")
-    print(nn.score(X=X[0], labels=X[1]))
-
-    print("\nMean square error: test set")
-    print(nn.score(X=Y[0], labels=Y[1]))"""

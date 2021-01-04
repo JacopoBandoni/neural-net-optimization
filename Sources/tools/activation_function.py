@@ -32,7 +32,8 @@ def apply_activation(activation, v):
     elif activation == "tanh":
         return tanh(v)
     elif activation == "linear":
-        return 1
+        return np.ones(v.shape)
+        # cambiare ritornando la forma di v
     else:
         raise Exception("Activation function not recognized")
 
@@ -43,7 +44,8 @@ def apply_d_activation(activation, v):
     elif activation == "tanh":
         return d_tanh(v)
     elif activation == "linear":
-        return 1
+        return np.ones(v.shape)
+        # cambiare ritornando la forma di v
     else:
         raise Exception("Activation function not recognized")
 

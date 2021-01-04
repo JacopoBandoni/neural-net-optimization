@@ -9,7 +9,9 @@ def __forward_pass(x, weights: dict, layers, cache):
     :param X: input vector of training set
     :param weights: weight dictionary of our network
     :param layers: layers configuration of our network
-    :return: tuple (output, cache). output is the prediction of our network, cahce is all weight in intermediate steps
+    :param cache: if should return either the cache or not
+    :return: tuple (output, cache) or (output). output is the prediction of our network,
+                                                cahce is all weight in intermediate steps
     """
 
     output = np.array(x)
@@ -34,7 +36,6 @@ def __forward_pass(x, weights: dict, layers, cache):
 
 
 def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
-    delta_i = 0
     delta_prev = []
     delta_next = []
     deltaW = {}
@@ -94,5 +95,32 @@ def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
             delta_prev = []
             deltab["b" + str(layer)] = np.array(deltab["b" + str(layer)]).T
             deltaW["W" + str(layer)] = np.array(deltaW["W" + str(layer)]).T
+
+    return deltaW, deltab
+
+
+def __backward_pass_extreme(output, labels, forward_cache: dict, layers):
+    deltaW = []
+    deltab = []
+
+    # compute the vector of deltaW for each neuron in output
+    for i in range(0, layers[len(layers) - 1]["neurons"]):
+
+        # compute (yi - oi) for each pattern
+        delta_i = labels[:, [i]] - forward_cache["output" + str(len(layers) - 1)][:, [i]]
+
+        # compute delta_i = (yi - oi)f'(neti) for each pattern
+        delta_i = delta_i.T * apply_d_activation(layers[len(layers)-1]["activation"],
+                                                 forward_cache['net' + str(len(layers)-1)][:, [i]].T)
+
+        # compute delta b for the i-th neuron in output
+        deltab.append(delta_i.T.mean(axis=0).tolist())
+
+        # compute oj(yi - oi)f'(neti) for each pattern and do the mean on all the pattern
+        deltaW.append((np.array(forward_cache['output' + str(len(layers) - 2)]) * delta_i.T)
+                      .mean(axis=0).tolist())
+
+    deltaW = np.array(deltaW).T
+    deltab = np.array(deltab).T
 
     return deltaW, deltab
