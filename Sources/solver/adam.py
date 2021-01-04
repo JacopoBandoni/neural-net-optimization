@@ -82,14 +82,10 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
                                           (np.sqrt(momentum_2_w_cap["W" + str(j)]) + epsilon_adam)) - \
                                          hyperparameters["lambda"] * weights["W" + str(j)]
 
+                # update bias
                 weights["b" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_b_cap["b" + str(j)]) /
                                           (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam)) - \
                                          hyperparameters["lambda"] * weights["b" + str(j)]
-
-                # update bias
-                # weights["b" + str(j)] += 0
-
-                pass
 
             num_batch += 1
 
