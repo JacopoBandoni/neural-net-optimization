@@ -40,7 +40,7 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
             # adjusting weigths
             for j in range(1, len(layers)):
                 weights["W" + str(j)] += (hyperparameters["stepsize"]/len(Xi)) * deltaW["W" + str(j)] - \
-                                         hyperparameters["lambda"] * weights["W" + str(j)]
+                                         2*hyperparameters["lambda"] * weights["W" + str(j)]
 
                 weights["b" + str(j)] += (hyperparameters["stepsize"]/len(Xi)) * deltab["b" + str(j)]
 
