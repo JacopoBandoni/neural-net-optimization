@@ -78,7 +78,7 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
+            self.hystory = sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "adam":
             print("\nRunning adam")
@@ -144,6 +144,9 @@ class NeuralNetwork:
             print("-->", keys, ":")
             for value in self.weights[keys]:
                 print(value)
+
+    def plot_graph(self):
+        pass
 
 
 # main used for test output
