@@ -1,12 +1,12 @@
 import numpy as np
 
 from Sources.solver.iter_utility import __forward_pass, __backward_pass
-from Sources.tools.score_function import mean_squared_error
+from Sources.tools.score_function import mean_squared_error, classification_accuracy
 from Sources.tools.useful import batch, unison_shuffle
 
 
 def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int,
-         shuffle: bool):
+         shuffle: bool, X_validation, labels_validation):
     """
     Compute steepest gradient descent, either batch or stochastic
     :param X: Our whole training data
@@ -22,6 +22,13 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     :param shuffle: Either shuffle or not shuffle our data
     :return:
     """
+
+    # needed to plot graph
+    history = {}
+    accuracy_train = []
+    accuracy_validation = []
+    mse_train = []
+    mse_validation = []
 
     errors = []
     momentum_1_w = {}
@@ -94,24 +101,29 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
             num_batch += 1
 
         num_batch = 0
+        # save mse on training data
         output = __forward_pass(X, weights, layers, False)
-        error = mean_squared_error(output, labels)
-        errors.append(error)
+        mse_train.append(mean_squared_error(output, labels))
+        # save mse on validation data
+        output_validation = __forward_pass(X_validation, weights, layers, False)
+        mse_validation.append(mean_squared_error(output_validation, labels_validation))
+        # save accuracy on training data
+        accuracy_train.append(classification_accuracy(output, labels))
+        # save accuracy on validation data
+        accuracy_validation.append(classification_accuracy(output_validation, labels_validation))
 
-        if error <= hyperparameters["epsilon"]:
-            print("\nStopping condition raggiunta:\nerrore = " + str(error))
+        if mse_train[i] <= hyperparameters["epsilon"]:
+            print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
             break
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
-        print("\nEpoch number " + str(i) + "\n->Error:", error)
+        print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
 
-# main used for test output
-if __name__ == "__main__":
-    print("Adam function tests")
+    history["mse_train"] = mse_train
+    history["mse_validation"] = mse_validation
+    history["acc_train"] = accuracy_train
+    history["acc_validation"] = accuracy_validation
 
-    Y = np.array([[1e-8, 4e-9], [1e-10, 9e-7]])
-
-    print(1- (0.9**2))
-    print(np.sqrt(Y))
+    return history

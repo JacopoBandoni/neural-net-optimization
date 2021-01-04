@@ -48,7 +48,7 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                     {"neurons": config["neurons"], "activation": "sigmoid"},
                                     {"neurons": 1, "activation": "sigmoid"}  # output
                                 ],
-                                'solver': 'sgd',
+                                'solver': 'adam',
                                 "problem": "classification"
                                 })
 
