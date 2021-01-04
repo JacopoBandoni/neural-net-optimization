@@ -2,11 +2,12 @@ import numpy as np
 
 from Sources.solver.iter_utility import __forward_pass, __backward_pass
 from Sources.tools.activation_function import *
-from Sources.tools.score_function import mean_squared_loss, mean_squared_error
+from Sources.tools.score_function import mean_squared_loss, mean_squared_error, classification_accuracy
 from Sources.tools.useful import batch, unison_shuffle
 
 
-def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int, shuffle: bool):
+def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int, shuffle: bool,
+        X_validation, labels_validation):
     """
     Compute steepest gradient descent, either batch or stochastic
     :param X: Our whole training data
@@ -23,10 +24,14 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
     :return:
     """
 
-    errors = []
     deltaW_old = {}
     deltab_old = {}
-
+    # needed to plot graph
+    history = {}
+    accuracy_train = []
+    accuracy_validation = []
+    mse_train = []
+    mse_validation = []
     for i in range(0, max_epochs):
 
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
@@ -51,23 +56,29 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
             deltaW_old = deltaW
             deltab_old = deltab
 
+        # save mse on training data
         output = __forward_pass(X, weights, layers, False)
-        error = mean_squared_error(output, labels)
-        errors.append(error)
+        mse_train.append(mean_squared_error(output, labels))
+        # save mse on validation data
+        output_validation = __forward_pass(X_validation, weights, layers, False)
+        mse_validation.append(mean_squared_error(output_validation, labels_validation))
+        # save accuracy on training data
+        accuracy_train.append(classification_accuracy(output, labels))
+        # save accuracy on validation data
+        accuracy_validation.append(classification_accuracy(output_validation, labels_validation))
 
-        if error <= hyperparameters["epsilon"]:
-            print("\nStopping condition raggiunta:\nerrore = " + str(error))
+        if mse_train[i] <= hyperparameters["epsilon"]:
+            print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
             break
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
-        print("\nEpoch number " + str(i) + "\n->Error:", error)
+        print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
 
+    history["mse_train"] = mse_train
+    history["mse_validation"] = mse_validation
+    history["acc_train"] = accuracy_train
+    history["acc_validation"] = accuracy_validation
 
-if __name__ == "__main__":
-    print("Steepest gradient descent test")
-
-    Y = np.array([[1, 2, 1, 3], [1, 1, 1, 1]])
-
-    print(Y.mean(axis=0))
+    return history

@@ -17,7 +17,7 @@ def mean_squared_error(output: list, target: list):
 
     return mse
 
-def classification_accuracy(output: list, target: list):
+def classification_accuracy(output, target):
     """
     it measures the accuracy of the model
     :param output: the output of the model already "tresholded" respect to an input X

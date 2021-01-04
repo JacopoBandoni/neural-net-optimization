@@ -2,7 +2,6 @@ import numpy as np
 
 from Sources.solver.adam import adam
 from Sources.solver.cholesky import cholesky
-from Sources.solver.extreme_adam import extreme_adam
 from Sources.solver.steepest_gradient_descent import sgd
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
@@ -37,11 +36,10 @@ class NeuralNetwork:
         if "solver" in settings and \
                 (settings["solver"] == "sgd" or
                  settings["solver"] == "adam" or
-                 settings["solver"] == "extreme_adam" or
                  settings["solver"] == "cholesky"):
             self.solver = settings["solver"]
         else:
-            raise Exception("Solver error")
+            raise Exception("Activation function error")
 
         if "problem" in settings and settings["problem"] == "classification" or settings["problem"] == "regression":
             self.problem = settings["problem"]
@@ -85,10 +83,6 @@ class NeuralNetwork:
         elif self.solver == "adam":
             print("\nRunning adam")
             adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
-
-        elif self.solver == "extreme_adam":
-            print("\nRunning extreme adam")
-            extreme_adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "cholesky":
             print("\nRunning cholesky")
@@ -151,6 +145,22 @@ class NeuralNetwork:
             for value in self.weights[keys]:
                 print(value)
 
+    def plot_graph(self):
+        plt.plot(self.history['acc_train'])
+        plt.plot(self.history['acc_validation'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left')
+        plt.show()
+        # "Loss"
+        plt.plot(self.history['mse_train'])
+        plt.plot(self.history['mse_validation'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left')
+        plt.show()
 
 # main used for test output
 if __name__ == "__main__":
