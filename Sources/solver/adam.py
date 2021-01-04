@@ -30,7 +30,7 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     mse_train = []
     mse_validation = []
 
-    errors = []
+    # momentum variables
     momentum_1_w = {}
     momentum_2_w = {}
     momentum_1_w_cap = {}
@@ -41,11 +41,10 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     momentum_1_b_cap = {}
     momentum_2_b_cap = {}
 
+    # hyperparam
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon_adam = 1e-8
-
-    num_batch = 0
 
     # inizialization momentum variables
     for j in range(1, len(layers)):
@@ -71,18 +70,21 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
 
             # adjusting weigths
             for j in range(1, len(layers)):
-
                 # update moment estimates
-                momentum_1_w["W" + str(j)] = ((1 - beta_1) * deltaW["W" + str(j)]) + (beta_1 * momentum_1_w["W" + str(j)])
-                momentum_2_w["W" + str(j)] = ((1 - beta_2) * (deltaW["W" + str(j)] ** 2)) + (beta_2 * momentum_2_w["W" + str(j)])
-                momentum_1_b["b" + str(j)] = ((1 - beta_1) * deltab["b" + str(j)]) + (beta_1 * momentum_1_b["b" + str(j)])
-                momentum_2_b["b" + str(j)] = ((1 - beta_2) * (deltab["b" + str(j)] ** 2)) + (beta_2 * momentum_2_b["b" + str(j)])
+                momentum_1_w["W" + str(j)] = ((1 - beta_1) * deltaW["W" + str(j)]) + (
+                            beta_1 * momentum_1_w["W" + str(j)])
+                momentum_2_w["W" + str(j)] = ((1 - beta_2) * (deltaW["W" + str(j)] ** 2)) + (
+                            beta_2 * momentum_2_w["W" + str(j)])
+                momentum_1_b["b" + str(j)] = ((1 - beta_1) * deltab["b" + str(j)]) + (
+                            beta_1 * momentum_1_b["b" + str(j)])
+                momentum_2_b["b" + str(j)] = ((1 - beta_2) * (deltab["b" + str(j)] ** 2)) + (
+                            beta_2 * momentum_2_b["b" + str(j)])
 
                 # compute bias correction
-                momentum_1_w_cap["W" + str(j)] = momentum_1_w["W" + str(j)] / (1 - (beta_1 ** (i+1)))
-                momentum_2_w_cap["W" + str(j)] = momentum_2_w["W" + str(j)] / (1 - (beta_2 ** (i+1)))
-                momentum_1_b_cap["b" + str(j)] = momentum_1_b["b" + str(j)] / (1 - (beta_1 ** (i+1)))
-                momentum_2_b_cap["b" + str(j)] = momentum_2_b["b" + str(j)] / (1 - (beta_2 ** (i+1)))
+                momentum_1_w_cap["W" + str(j)] = momentum_1_w["W" + str(j)] / (1 - (beta_1 ** (i + 1)))
+                momentum_2_w_cap["W" + str(j)] = momentum_2_w["W" + str(j)] / (1 - (beta_2 ** (i + 1)))
+                momentum_1_b_cap["b" + str(j)] = momentum_1_b["b" + str(j)] / (1 - (beta_1 ** (i + 1)))
+                momentum_2_b_cap["b" + str(j)] = momentum_2_b["b" + str(j)] / (1 - (beta_2 ** (i + 1)))
 
                 # update weight values
                 weights["W" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_w_cap["W" + str(j)]) /
@@ -91,8 +93,8 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
 
                 # update bias
                 weights["b" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_b_cap["b" + str(j)]) /
-                                          (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam)) - \
-                                         hyperparameters["lambda"] * weights["b" + str(j)]
+                                          (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam))  # - \
+                # hyperparameters["lambda"] * weights["b" + str(j)]
 
         output = __forward_pass(X, weights, layers, False)
         mse_train.append(mean_squared_error(output, labels))
@@ -117,5 +119,7 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     history["mse_validation"] = mse_validation
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
+
+    print(mse_train[i])
 
     return history

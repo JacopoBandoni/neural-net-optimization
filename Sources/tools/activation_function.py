@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def sigmoid(x):
@@ -33,7 +32,6 @@ def apply_activation(activation, v):
         return tanh(v)
     elif activation == "linear":
         return v
-        # cambiare ritornando la forma di v
     else:
         raise Exception("Activation function not recognized")
 
@@ -45,7 +43,6 @@ def apply_d_activation(activation, v):
         return d_tanh(v)
     elif activation == "linear":
         return np.ones(v.shape)
-        # cambiare ritornando la forma di v
     else:
         raise Exception("Activation function not recognized")
 

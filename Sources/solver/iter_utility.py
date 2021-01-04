@@ -15,7 +15,9 @@ def __forward_pass(x, weights: dict, layers, cache):
     """
 
     output = np.array(x)
-    forward_cache = {"output0": output}
+
+    if cache:
+        forward_cache = {"output0": output}
 
     for i in range(1, len(layers)):
 

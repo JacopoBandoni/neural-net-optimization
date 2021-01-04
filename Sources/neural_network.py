@@ -9,6 +9,7 @@ from Sources.tools.score_function import *
 from Sources.tools.preprocessing import one_hot
 from Sources.tools.load_dataset import *
 from Sources.tools.weight_initialization import xavier_init
+import matplotlib.pyplot as plt
 
 
 class NeuralNetwork:
@@ -61,7 +62,8 @@ class NeuralNetwork:
 
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
-    def fit(self, X, labels, X_validation, labels_validation,  hyperparameters: dict, epochs=1, batch_size=32, shuffle=True,
+    def fit(self, X, labels, X_validation, labels_validation, hyperparameters: dict, epochs=1, batch_size=32,
+            shuffle=True,
             ):
         """
         :param labels_validation:
@@ -118,10 +120,7 @@ class NeuralNetwork:
 
             output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
 
-            if self.layers[i]["activation"] == "sigmoid":
-                output = sigmoid(output)
-            if self.layers[i]["activation"] == "tanh":
-                output = tanh(output)
+            output = apply_activation(self.layers[i]["activation"], output)
 
         return output
 
@@ -136,13 +135,9 @@ class NeuralNetwork:
 
         for i in range(1, len(self.layers)):
 
-            if i != len(self.layers):
-                output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
+            output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
 
-            if self.layers[i]["activation"] == "sigmoid":
-                output = sigmoid(output)
-            if self.layers[i]["activation"] == "tanh":
-                output = tanh(output)
+            output = apply_activation(self.layers[i]["activation"], output)
 
         return mean_squared_error(output, labels)
 
@@ -173,38 +168,10 @@ class NeuralNetwork:
         plt.legend(['train', 'validation'], loc='upper left')
         plt.show()
 
+
 # main used for test output
 if __name__ == "__main__":
     print("Neural network tests")
-
-    """
-    X = ([[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]], [[0, 0], [0, 0], [0, 0], [1, 0], [1, 1]])
-    Y = ([[0, 0, 0], [0, 1, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]], [[0, 0], [0, 0], [1, 0], [0, 1], [1, 1]])
-
-    nn = NeuralNetwork({'seed': 0,
-                        'layers': [
-                            {"neurons": len(X[0][0]), "activation": "linear"},
-                            # input only for dimension, insert linear
-                            {"neurons": 6, "activation": "sigmoid"},
-                            {"neurons": 2, "activation": "sigmoid"}  # output
-                        ],
-                        'solver': 'sgd',
-                        "problem": "classification"
-                        })
-
-    nn.fit(X=X[0], labels=X[1], hyperparameters={"lambda": 0, "stepsize": 1, "momentum": 0.9, "epsilon": 0.001}, epochs=1000)
-
-    # print("\nPrediction")
-    # print(nn.predict(one_hot(X[0])).mean(axis=0))
-    # print(np.array([[i] for i in X[1]]).mean(axis=0))
-
-    print("\nMean square error: train set")
-    print(nn.score(X=X[0], labels=X[1]))
-
-    print("\nMean square error: test set")
-    print(nn.score(X=Y[0], labels=Y[1]))
-
-    """
 
     X, Y = load_monk(3)
 
@@ -223,7 +190,7 @@ if __name__ == "__main__":
            labels=[[i] for i in X[1]],
            hyperparameters={"lambda": 0, "stepsize": 0.001, "momentum": 0.9, "epsilon": 0.009},
            epochs=1000,
-           batch_size=32,)
+           batch_size=32, )
 
     print("\nMean square error: train set")
     print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
@@ -240,4 +207,3 @@ if __name__ == "__main__":
 
     print("\nClassification accuracy test set:")
     print(classification_accuracy(output=treshold_list_test, target=Y[1]))
-
