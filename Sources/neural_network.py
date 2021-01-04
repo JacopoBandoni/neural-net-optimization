@@ -59,7 +59,8 @@ class NeuralNetwork:
 
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
-    def fit(self, X, labels, hyperparameters: dict, epochs=1, batch_size=32, shuffle=True):
+    def fit(self, X, labels, X_validation, labels_validation, hyperparameters: dict, epochs=1, batch_size=32, shuffle=True,
+            ):
         """
         :param X:
         :param labels:
@@ -78,11 +79,13 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
+            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
+                X_validation, labels_validation)
 
         elif self.solver == "adam":
             print("\nRunning adam")
-            adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
+            adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
+                 X_validation, labels_validation)
 
         elif self.solver == "cholesky":
             print("\nRunning cholesky")
