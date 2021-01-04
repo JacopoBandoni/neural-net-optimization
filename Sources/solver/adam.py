@@ -1,12 +1,12 @@
 import numpy as np
 
 from Sources.solver.iter_utility import __forward_pass, __backward_pass
-from Sources.tools.score_function import mean_squared_error, classification_accuracy
+from Sources.tools.score_function import mean_squared_error
 from Sources.tools.useful import batch, unison_shuffle
 
 
 def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int,
-         shuffle: bool, X_validation, labels_validation):
+         shuffle: bool):
     """
     Compute steepest gradient descent, either batch or stochastic
     :param X: Our whole training data
@@ -23,13 +23,7 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     :return:
     """
 
-    # needed to plot graph
-    history = dict
-    accuracy_train = []
-    accuracy_validation = []
-    mse_train = []
-    mse_validation = []
-
+    errors = []
     momentum_1_w = {}
     momentum_2_w = {}
     momentum_1_w_cap = {}
@@ -88,36 +82,36 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
                                           (np.sqrt(momentum_2_w_cap["W" + str(j)]) + epsilon_adam)) - \
                                          hyperparameters["lambda"] * weights["W" + str(j)]
 
-                # update bias
                 weights["b" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_b_cap["b" + str(j)]) /
                                           (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam)) - \
                                          hyperparameters["lambda"] * weights["b" + str(j)]
 
+                # update bias
+                # weights["b" + str(j)] += 0
+
+                pass
+
             num_batch += 1
 
         num_batch = 0
-        # save mse on training data
-        mse_train.append(mean_squared_error(output, labels))
-        # save mse on validation data
-        output_validation = __forward_pass(X_validation, weights, layers, False)
-        mse_validation.append(mean_squared_error(output_validation, labels_validation))
-        # save accuracy on training data
-        accuracy_train.append(classification_accuracy(output, labels))
-        # save accuracy on validation data
-        accuracy_validation.append(classification_accuracy(output_validation, labels_validation))
+        output = __forward_pass(X, weights, layers, False)
+        error = mean_squared_error(output, labels)
+        errors.append(error)
 
-        if mse_train[i] <= hyperparameters["epsilon"]:
-            print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
+        if error <= hyperparameters["epsilon"]:
+            print("\nStopping condition raggiunta:\nerrore = " + str(error))
             break
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
-        print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
+        print("\nEpoch number " + str(i) + "\n->Error:", error)
 
-    history["mse_train"] = mse_train
-    history["mse_validation"] = mse_validation
-    history["acc_train"] = accuracy_train
-    history["acc_validation"] = accuracy_validation
+# main used for test output
+if __name__ == "__main__":
+    print("Adam function tests")
 
-    return history
+    Y = np.array([[1e-8, 4e-9], [1e-10, 9e-7]])
+
+    print(1- (0.9**2))
+    print(np.sqrt(Y))

@@ -27,7 +27,7 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
     deltaW_old = {}
     deltab_old = {}
     # needed to plot graph
-    history = dict
+    history = {}
     accuracy_train = []
     accuracy_validation = []
     mse_train = []
@@ -57,6 +57,7 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
             deltab_old = deltab
 
         # save mse on training data
+        output = __forward_pass(X, weights, layers, False)
         mse_train.append(mean_squared_error(output, labels))
         # save mse on validation data
         output_validation = __forward_pass(X_validation, weights, layers, False)
