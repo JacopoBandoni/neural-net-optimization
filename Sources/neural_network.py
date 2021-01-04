@@ -1,4 +1,4 @@
-import numpy as np
+import matplotlib as plt
 
 from Sources.solver.adam import adam
 from Sources.solver.cholesky import cholesky
@@ -78,7 +78,7 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            self.hystory = sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
+            self.history = sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "adam":
             print("\nRunning adam")
@@ -146,7 +146,21 @@ class NeuralNetwork:
                 print(value)
 
     def plot_graph(self):
-        pass
+        plt.plot(self.history['acc_train'])
+        plt.plot(self.history['acc_validation'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left')
+        plt.show()
+        # "Loss"
+        plt.plot(self.history['mse_train'])
+        plt.plot(self.history['mse_validation'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left')
+        plt.show()
 
 
 # main used for test output
