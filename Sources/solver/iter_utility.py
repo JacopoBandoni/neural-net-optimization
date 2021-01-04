@@ -100,6 +100,7 @@ def __backward_pass(output, labels, weights: dict, forward_cache: dict, layers):
 
 
 def __backward_pass_extreme(output, labels, forward_cache: dict, layers):
+
     deltaW = []
     deltab = []
 

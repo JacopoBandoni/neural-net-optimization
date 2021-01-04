@@ -52,7 +52,7 @@ def extreme_adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, 
             # backward propagation
             deltaW, deltab = __backward_pass_extreme(output, np.array(Yi), forward_cache, layers)
 
-            #print("calcolo deltaW dalla forward =\n" + str(momentum_1_w_cap))
+            # print("calcolo deltaW dalla forward =\n" + str(momentum_1_w_cap))
 
             # update moment estimates
             momentum_1_w = ((1 - beta_1) * deltaW) + (beta_1 * momentum_1_w)
@@ -72,9 +72,9 @@ def extreme_adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, 
             """
             print("momentum 1 w cap =\n" + str(momentum_1_w_cap))
             print("momentum 2 w cap =\n" + str(momentum_2_w_cap))
-            print("formula adam senza reg =\n" + str(((hyperparameters["stepsize"] * momentum_1_w_cap) /
-                                                      (np.sqrt(momentum_2_w_cap) + epsilon_adam))))
-            """
+                        """
+            #print("formula adam senza reg =\n" + str(((hyperparameters["stepsize"] * momentum_1_w_cap) /
+                                                      # (np.sqrt(momentum_2_w_cap) + epsilon_adam))))
 
             # update weight values
             weights["W" + str(len(layers) - 1)] += ((hyperparameters["stepsize"] * momentum_1_w_cap) /
@@ -85,8 +85,8 @@ def extreme_adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, 
 
             # update bias
             weights["b" + str(len(layers) - 1)] += ((hyperparameters["stepsize"] * momentum_1_b_cap) /
-                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam)) - \
-                                                   hyperparameters["lambda"] * weights["b" + str(len(layers) - 1)]
+                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam)) #- \
+                                                  # hyperparameters["lambda"] * weights["b" + str(len(layers) - 1)]
 
         output = __forward_pass(X, weights, layers, False)
         error = mean_squared_error(output, labels)

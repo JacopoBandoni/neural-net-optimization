@@ -2,6 +2,7 @@ import numpy as np
 
 from Sources.solver.adam import adam
 from Sources.solver.cholesky import cholesky
+from Sources.solver.extreme_adam import extreme_adam
 from Sources.solver.steepest_gradient_descent import sgd
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
@@ -36,6 +37,7 @@ class NeuralNetwork:
         if "solver" in settings and \
                 (settings["solver"] == "sgd" or
                  settings["solver"] == "adam" or
+                 settings["solver"] == "extreme_adam" or
                  settings["solver"] == "cholesky"):
             self.solver = settings["solver"]
         else:
@@ -59,9 +61,11 @@ class NeuralNetwork:
 
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
-    def fit(self, X, labels, X_validation, labels_validation, hyperparameters: dict, epochs=1, batch_size=32, shuffle=True,
+    def fit(self, X, labels, X_validation, labels_validation,  hyperparameters: dict, epochs=1, batch_size=32, shuffle=True,
             ):
         """
+        :param labels_validation:
+        :param X_validation:
         :param X:
         :param labels:
         :param hyperparameters:
@@ -86,6 +90,10 @@ class NeuralNetwork:
             print("\nRunning adam")
             adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
                  X_validation, labels_validation)
+
+        elif self.solver == "extreme_adam":
+            print("\nRunning adam")
+            extreme_adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle)
 
         elif self.solver == "cholesky":
             print("\nRunning cholesky")
@@ -198,13 +206,13 @@ if __name__ == "__main__":
 
     """
 
-    X, Y = load_monk(2)
+    X, Y = load_monk(3)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 2, "activation": "tanh"},
+                            {"neurons": 100, "activation": "tanh"},
                             {"neurons": 1, "activation": "linear"}  # output
                         ],
                         'solver': 'extreme_adam',
@@ -213,9 +221,9 @@ if __name__ == "__main__":
 
     nn.fit(X=one_hot(X[0]),
            labels=[[i] for i in X[1]],
-           hyperparameters={"lambda": 0.0003, "stepsize": 0.001, "momentum": 0.9, "epsilon": 0.009},
-           epochs=2000,
-           batch_size=32)
+           hyperparameters={"lambda": 0, "stepsize": 0.001, "momentum": 0.9, "epsilon": 0.009},
+           epochs=1000,
+           batch_size=32,)
 
     print("\nMean square error: train set")
     print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
