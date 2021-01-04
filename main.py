@@ -26,6 +26,8 @@ def grid_search(X, Y, hyperparameters: dict):
 
         nn.fit(X=one_hot(X[0]),
                labels=[[i] for i in X[1]],
+               X_validation=[0],
+               labels_validation=[0],
                hyperparameters={"lambda": config["lambda"],
                                 "stepsize": config["stepsize"],
                                 "momentum": config["momentum"],
@@ -69,3 +71,5 @@ if __name__ == "__main__":
 
     grid_search(X, Y, grid_parameters)
 
+
+    # TODO remember to train the final model over train+validation

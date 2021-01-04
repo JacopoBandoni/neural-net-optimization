@@ -81,11 +81,3 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
     history["acc_validation"] = accuracy_validation
 
     return history
-
-
-if __name__ == "__main__":
-    print("Steepest gradient descent test")
-
-    Y = np.array([[1, 2, 1, 3], [1, 1, 1, 1]])
-
-    print(Y.mean(axis=0))
