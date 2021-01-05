@@ -106,7 +106,7 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
             accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
             # how to plot accuracy on regression?
 
-        if mse_train[i] <= hyperparameters["epsilon"]:
+        if mse_validation[i] <= hyperparameters["epsilon"]:
             print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
             break
 
