@@ -32,14 +32,10 @@ def classification_accuracy(output, target):
     wrong = 0
 
     for i in range(0, len(target)):
-
         if output[i] == target[i]:
-            print(output[i])
-            print(target[i])
             correct += 1
         else:
             wrong += 1
-
     return correct/(correct+wrong)
 
 
