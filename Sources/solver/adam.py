@@ -6,7 +6,7 @@ from Sources.tools.useful import batch, unison_shuffle
 
 
 def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int,
-         shuffle: bool, X_validation, labels_validation):
+         shuffle: bool, problem, X_validation, labels_validation):
     """
     Compute steepest gradient descent, either batch or stochastic
     :param X: Our whole training data
@@ -101,12 +101,18 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
         # save mse on validation data
         output_validation = __forward_pass(X_validation, weights, layers, False)
         mse_validation.append(mean_squared_error(output_validation, labels_validation))
-        # save accuracy on training data
-        accuracy_train.append(classification_accuracy(output, labels))
-        # save accuracy on validation data
-        accuracy_validation.append(classification_accuracy(output_validation, labels_validation))
 
-        if mse_train[i] <= hyperparameters["epsilon"]:
+        # save accuracy
+        if problem == "classification":
+            treshold_list_train = [[1] if i > 0.5 else [0] for i in output]
+            treshold_list_test = [[1] if i > 0.5 else [0] for i in output_validation]
+            accuracy_train.append(classification_accuracy(treshold_list_train, labels))
+            accuracy_validation.append(classification_accuracy(treshold_list_test, labels_validation))
+        else:
+            pass
+            # how to plot accuracy on regression?
+
+        if mse_validation[i] <= hyperparameters["epsilon"]:
             print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
             break
 
@@ -119,7 +125,5 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     history["mse_validation"] = mse_validation
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
-
-    print(mse_train[i])
 
     return history

@@ -90,8 +90,8 @@ class NeuralNetwork:
 
         elif self.solver == "adam":
             print("\nRunning adam")
-            adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
-                 X_validation, labels_validation)
+            self.history= adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
+                 self.problem, X_validation, labels_validation)
 
         elif self.solver == "extreme_adam":
             print("\nRunning adam")

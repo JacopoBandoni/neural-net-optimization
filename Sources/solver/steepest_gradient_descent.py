@@ -62,15 +62,18 @@ def sgd(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoch
         # save mse on validation data
         output_validation = __forward_pass(X_validation, weights, layers, False)
         mse_validation.append(mean_squared_error(output_validation, labels_validation))
+
         # save accuracy
         if problem == "classification":
             treshold_list_train = [[1] if i > 0.5 else [0] for i in output]
             treshold_list_test = [[1] if i > 0.5 else [0] for i in output_validation]
             accuracy_train.append(classification_accuracy(treshold_list_train, labels))
-        # save accuracy on validation data
-        accuracy_validation.append(classification_accuracy(output_validation, labels_validation))
+            accuracy_validation.append(classification_accuracy(treshold_list_test, labels_validation))
+        else:
+            pass
+            # how to plot accuracy on regression?
 
-        if mse_train[i] <= hyperparameters["epsilon"]:
+        if mse_validation[i] <= hyperparameters["epsilon"]:
             print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
             break
 

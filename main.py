@@ -120,9 +120,9 @@ if __name__ == "__main__":
                             # input only for dimension, insert linear
                             {"neurons": 5, "activation": "sigmoid"},
                             {"neurons": 6, "activation": "sigmoid"},
-                            {"neurons": 1, "activation": "tanh"}  # output
+                            {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
-                        'solver': 'sgd',
+                        'solver': 'adam',
                         "problem": "classification"
                         })
     hyperparameters = {"lambda": 0.1, "stepsize": 0.001, "momentum": 0.5, "epsilon": 0.009},
@@ -132,9 +132,9 @@ if __name__ == "__main__":
            X_validation=X_train[-20:],
            labels_validation=[[i] for i in y_train[-20:]],
            hyperparameters={"lambda": 0,
-                            "stepsize": 0.001,
-                            "momentum": 0.9,
-                            "epsilon": 0.009},
-           epochs=300)
+                            "stepsize": 0.0001,
+                            "momentum": 0.3,
+                            "epsilon": 0.00001},
+           epochs=500)
 
     nn.plot_graph()
