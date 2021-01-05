@@ -63,8 +63,7 @@ class NeuralNetwork:
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
     def fit(self, X, labels, X_validation, labels_validation, hyperparameters: dict, epochs=1, batch_size=32,
-            shuffle=True,
-            ):
+            shuffle=True):
         """
         :param labels_validation:
         :param X_validation:
@@ -85,8 +84,8 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            self.history = sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
-                self.problem, X_validation, labels_validation)
+            self.history = sgd(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
+                X_validation, labels_validation)
 
         elif self.solver == "adam":
             print("\nRunning adam")
@@ -110,6 +109,7 @@ class NeuralNetwork:
 
     def predict(self, X):
         """
+        Compute the output of the network given examples
         :param X: X: Test data where is computed output
         :return:
         """
@@ -124,22 +124,28 @@ class NeuralNetwork:
 
         return output
 
-    def score(self, X, labels):
+    def score_mse(self, X, labels):
         """
+        Compute mse of the network given inputs data
         :param X: test data where is computed output
         :param labels: target output where is computed scored function
         :return: mean square error over the test set
         """
 
-        output = np.array(X)
+        return mean_squared_error(self.predict(X), labels)
 
-        for i in range(1, len(self.layers)):
+    def score_accuracy(self, X, labels):
+        """
+        COmpute accuracy of the model given inputs data
+        :param X: test data where is computed accuracy
+        :param labels:
+        :return:
+        """
+        X = self.predict(X)
+        treshold_list = [[1] if i > 0.5 else [0] for i in X]
 
-            output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
+        return classification_accuracy(treshold_list, labels)
 
-            output = apply_activation(self.layers[i]["activation"], output)
-
-        return mean_squared_error(output, labels)
 
     def plot_model(self):
         """

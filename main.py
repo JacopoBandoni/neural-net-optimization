@@ -122,7 +122,7 @@ if __name__ == "__main__":
                             {"neurons": 6, "activation": "sigmoid"},
                             {"neurons": 1, "activation": "sigmoid"}  # output
                         ],
-                        'solver': 'adam',
+                        'solver': 'sgd',
                         "problem": "classification"
                         })
     hyperparameters = {"lambda": 0.1, "stepsize": 0.001, "momentum": 0.5, "epsilon": 0.009},
