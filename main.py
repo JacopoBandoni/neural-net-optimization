@@ -49,7 +49,7 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
                                 ],
-                                'solver': 'sgd',
+                                'solver': 'adam',
                                 "problem": "classification"
                                 })
 
@@ -62,11 +62,12 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                     "momentum": config["momentum"],
                                     "epsilon": 0.0001},
                    epochs=epochs,
-                   batch_size=32, )
+                   batch_size=32,
+                   shuffle=True)
 
             # to visualize plot for each configuration test
-            # nn.plot_graph()
-            # input()
+            nn.plot_graph()
+            input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
