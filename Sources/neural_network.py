@@ -141,7 +141,7 @@ class NeuralNetwork:
         :return:
         """
         X = self.predict(X)
-        treshold_list = [1 if i > 0.5 else 0 for i in X]
+        treshold_list = [[1] if i > 0.5 else [0] for i in X]
 
         return classification_accuracy(treshold_list, labels)
 
@@ -209,3 +209,5 @@ if __name__ == "__main__":
 
     print("\nClassification accuracy test set:")
     print(nn.score_accuracy(one_hot(Y[0]), Y[1]))
+
+    nn.plot_graph()

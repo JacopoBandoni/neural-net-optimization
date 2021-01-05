@@ -50,8 +50,8 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                 'layers': [
                                     {"neurons": len(x_train[0]), "activation": "linear"},
                                     # input only for dimension, insert linear
-                                    {"neurons": config["neurons"], "activation": "sigmoid"},
-                                    {"neurons": 1, "activation": "sigmoid"}  # output
+                                    {"neurons": config["neurons"], "activation": "tanh"},
+                                    {"neurons": 1, "activation": "tanh"}  # output
                                 ],
                                 'solver': 'sgd',
                                 "problem": "classification"
@@ -72,10 +72,10 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
             # input()
 
             # store results
-            mse_train.append(nn.history["mse_train"])
-            mse_validation.append(nn.history["mse_validation"])
-            accuracy_train.append(nn.history["acc_train"])
-            accuracy_validation.append(nn.history["acc_validation"])
+            mse_train.append(nn.history["mse_train"][-1])
+            mse_validation.append(nn.history["mse_validation"][-1])
+            accuracy_train.append(nn.history["acc_train"][-1])
+            accuracy_validation.append(nn.history["acc_validation"][-1])
 
         experiment_data = {}
         for name in config:
