@@ -5,8 +5,8 @@ from Sources.tools.score_function import mean_squared_error, classification_accu
 from Sources.tools.useful import batch, unison_shuffle
 
 
-def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epochs: int, batch_size: int,
-         shuffle: bool, problem, X_validation, labels_validation):
+def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: int, shuffle: bool,
+         X_validation, labels_validation):
     """
     Compute steepest gradient descent, either batch or stochastic
     :param X: Our whole training data
@@ -47,29 +47,29 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
     epsilon_adam = 1e-8
 
     # inizialization momentum variables
-    for j in range(1, len(layers)):
-        momentum_1_w["W" + str(j)] = np.zeros(weights["W" + str(j)].shape)
-        momentum_2_w["W" + str(j)] = np.zeros(weights["W" + str(j)].shape)
-        momentum_1_w_cap["W" + str(j)] = np.zeros(weights["W" + str(j)].shape)
-        momentum_2_w_cap["W" + str(j)] = np.zeros(weights["W" + str(j)].shape)
+    for j in range(1, len(model.layers)):
+        momentum_1_w["W" + str(j)] = np.zeros(model.weights["W" + str(j)].shape)
+        momentum_2_w["W" + str(j)] = np.zeros(model.weights["W" + str(j)].shape)
+        momentum_1_w_cap["W" + str(j)] = np.zeros(model.weights["W" + str(j)].shape)
+        momentum_2_w_cap["W" + str(j)] = np.zeros(model.weights["W" + str(j)].shape)
 
-        momentum_1_b["b" + str(j)] = np.zeros(weights["b" + str(j)].shape)
-        momentum_2_b["b" + str(j)] = np.zeros(weights["b" + str(j)].shape)
-        momentum_1_b_cap["b" + str(j)] = np.zeros(weights["b" + str(j)].shape)
-        momentum_2_b_cap["b " + str(j)] = np.zeros(weights["b" + str(j)].shape)
+        momentum_1_b["b" + str(j)] = np.zeros(model.weights["b" + str(j)].shape)
+        momentum_2_b["b" + str(j)] = np.zeros(model.weights["b" + str(j)].shape)
+        momentum_1_b_cap["b" + str(j)] = np.zeros(model.weights["b" + str(j)].shape)
+        momentum_2_b_cap["b " + str(j)] = np.zeros(model.weights["b" + str(j)].shape)
 
     for i in range(0, max_epochs):
 
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
             # forward propagatiom
-            output, forward_cache = __forward_pass(Xi, weights, layers, True)
+            output, forward_cache = __forward_pass(Xi, model.weights, model.layers, True)
 
             # backward propagation
-            deltaW, deltab = __backward_pass(output, np.array(Yi), weights, forward_cache, layers)
+            deltaW, deltab = __backward_pass(output, np.array(Yi), model.weights, forward_cache, model.layers)
 
             # adjusting weigths
-            for j in range(1, len(layers)):
+            for j in range(1, len(model.layers)):
                 # update moment estimates
                 momentum_1_w["W" + str(j)] = ((1 - beta_1) * deltaW["W" + str(j)]) + (
                             beta_1 * momentum_1_w["W" + str(j)])
@@ -87,32 +87,26 @@ def adam(X, labels, weights: dict, layers: dict, hyperparameters: dict, max_epoc
                 momentum_2_b_cap["b" + str(j)] = momentum_2_b["b" + str(j)] / (1 - (beta_2 ** (i + 1)))
 
                 # update weight values
-                weights["W" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_w_cap["W" + str(j)]) /
+                model.weights["W" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_w_cap["W" + str(j)]) /
                                           (np.sqrt(momentum_2_w_cap["W" + str(j)]) + epsilon_adam)) - \
-                                         hyperparameters["lambda"] * weights["W" + str(j)]
+                                         hyperparameters["lambda"] * model.weights["W" + str(j)]
 
                 # update bias
-                weights["b" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_b_cap["b" + str(j)]) /
+                model.weights["b" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_b_cap["b" + str(j)]) /
                                           (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam))  # - \
                 # hyperparameters["lambda"] * weights["b" + str(j)]
 
-        output = __forward_pass(X, weights, layers, False)
-        mse_train.append(mean_squared_error(output, labels))
-        # save mse on validation data
-        output_validation = __forward_pass(X_validation, weights, layers, False)
-        mse_validation.append(mean_squared_error(output_validation, labels_validation))
+        # save mse
+        mse_train.append(model.score_mse(X, labels))
+        mse_validation.append(model.score_mse(X_validation, labels_validation))
 
         # save accuracy
-        if problem == "classification":
-            treshold_list_train = [[1] if i > 0.5 else [0] for i in output]
-            treshold_list_test = [[1] if i > 0.5 else [0] for i in output_validation]
-            accuracy_train.append(classification_accuracy(treshold_list_train, labels))
-            accuracy_validation.append(classification_accuracy(treshold_list_test, labels_validation))
-        else:
-            pass
+        if model.problem == "classification":
+            accuracy_train.append(model.score_accuracy(X, labels))
+            accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
             # how to plot accuracy on regression?
 
-        if mse_validation[i] <= hyperparameters["epsilon"]:
+        if mse_train[i] <= hyperparameters["epsilon"]:
             print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
             break
 

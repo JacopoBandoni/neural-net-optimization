@@ -85,12 +85,12 @@ class NeuralNetwork:
         if self.solver == "sgd":
             print("\nRunning sgd")
             self.history = sgd(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
-                X_validation, labels_validation)
+                               X_validation, labels_validation)
 
         elif self.solver == "adam":
             print("\nRunning adam")
-            self.history= adam(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
-                 self.problem, X_validation, labels_validation)
+            self.history = adam(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
+                                X_validation, labels_validation)
 
         elif self.solver == "extreme_adam":
             print("\nRunning adam")
@@ -117,7 +117,6 @@ class NeuralNetwork:
         output = np.array(X)
 
         for i in range(1, len(self.layers)):
-
             output = output @ self.weights['W' + str(i)] + self.weights['b' + str(i)]
 
             output = apply_activation(self.layers[i]["activation"], output)
@@ -145,7 +144,6 @@ class NeuralNetwork:
         treshold_list = [[1] if i > 0.5 else [0] for i in X]
 
         return classification_accuracy(treshold_list, labels)
-
 
     def plot_model(self):
         """
