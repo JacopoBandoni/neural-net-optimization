@@ -34,11 +34,13 @@ def classification_accuracy(output, target):
     for i in range(0, len(target)):
 
         if output[i] == target[i]:
+            print(output[i])
+            print(target[i])
             correct += 1
         else:
             wrong += 1
 
-    return (correct*100)/len(target)
+    return correct/(correct+wrong)
 
 
 def mean_euclidean_error(output: list, target: list):

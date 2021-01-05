@@ -98,14 +98,43 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
 
 
 if __name__ == "__main__":
+    """
     grid_parameters = {"lambda": [0.1, 0.3],
                        "stepsize": [0.1, 0.3],
                        "momentum": [0.5, 0.7],
                        "neurons": [10, 50]
                        }
+    """
 
     (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
 
-    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5)
+    # grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5)
+
+    X_train = one_hot(X_train)
 
     # TODO remember to train the final model over train+validation
+    # train the network over set
+    nn = NeuralNetwork({'seed': 0,
+                        'layers': [
+                            {"neurons": len(X_train[0]), "activation": "linear"},
+                            # input only for dimension, insert linear
+                            {"neurons": 5, "activation": "sigmoid"},
+                            {"neurons": 6, "activation": "sigmoid"},
+                            {"neurons": 1, "activation": "tanh"}  # output
+                        ],
+                        'solver': 'sgd',
+                        "problem": "classification"
+                        })
+    hyperparameters = {"lambda": 0.1, "stepsize": 0.001, "momentum": 0.5, "epsilon": 0.009},
+
+    nn.fit(X=X_train[0:-20],
+           labels=[[i] for i in y_train[0:-20]],
+           X_validation=X_train[-20:],
+           labels_validation=[[i] for i in y_train[-20:]],
+           hyperparameters={"lambda": 0,
+                            "stepsize": 0.001,
+                            "momentum": 0.9,
+                            "epsilon": 0.009},
+           epochs=300)
+
+    nn.plot_graph()

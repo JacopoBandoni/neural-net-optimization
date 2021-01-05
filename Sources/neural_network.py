@@ -85,8 +85,8 @@ class NeuralNetwork:
 
         if self.solver == "sgd":
             print("\nRunning sgd")
-            sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
-                X_validation, labels_validation)
+            self.history = sgd(X, labels, self.weights, self.layers, hyperparameters, epochs, batch_size, shuffle,
+                self.problem, X_validation, labels_validation)
 
         elif self.solver == "adam":
             print("\nRunning adam")
@@ -162,8 +162,8 @@ class NeuralNetwork:
         # "Loss"
         plt.plot(self.history['mse_train'])
         plt.plot(self.history['mse_validation'])
-        plt.title('model loss')
-        plt.ylabel('loss')
+        plt.title('model error')
+        plt.ylabel('error')
         plt.xlabel('epoch')
         plt.legend(['train', 'validation'], loc='upper left')
         plt.show()
@@ -199,7 +199,6 @@ if __name__ == "__main__":
     print(nn.score(X=one_hot(Y[0]), labels=[[i] for i in Y[1]]))
 
     treshold_list_train = [1 if i > 0.5 else 0 for i in nn.predict(one_hot(X[0]))]
-
     treshold_list_test = [1 if i > 0.5 else 0 for i in nn.predict(one_hot(Y[0]))]
 
     print("\nClassification accuracy training set:")
