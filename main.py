@@ -23,11 +23,6 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
         X_partitioned = [X_train[i:i + partition_len] for i in range(0, len(X_train) - rest_of_patterns, partition_len)]
         Y_partitioned = [Y_train[i:i + partition_len] for i in range(0, len(Y_train) - rest_of_patterns, partition_len)]
 
-        print(np.array(X_train).shape)
-        print(np.array(X_partitioned).shape)
-        print(np.array(X_partitioned[2:]).shape)
-        print(np.concatenate(np.array(X_partitioned[1:])).shape)
-
         # to mean result
         mse_train = []
         mse_validation = []
@@ -35,15 +30,16 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
         accuracy_validation = []
 
         for fold in range(1, fold_number):
+
             # creating partition mutually exclusive
-            x_subset = X_partitioned[fold:]
+            x_subset = X_partitioned[:fold] + X_partitioned[fold+1:]
             x_train = np.concatenate(x_subset)
 
             y_subset = Y_partitioned[:fold] + Y_partitioned[fold + 1:]
             y_train = np.concatenate(y_subset)
 
-            x_validation = X_partitioned[fold]
-            y_validation = Y_partitioned[fold]
+            x_validation = np.array(X_partitioned[fold])
+            y_validation = np.array(Y_partitioned[fold])
 
             # train the network over set
             nn = NeuralNetwork({'seed': 0,
@@ -65,7 +61,8 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
                                     "epsilon": 0.0001},
-                   epochs=epochs)
+                   epochs=epochs,
+                   batch_size=32, )
 
             # to visualize plot for each configuration test
             # nn.plot_graph()
@@ -83,9 +80,13 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
         # compute mean over fold
         experiment_data["mse_train"] = np.mean(mse_train)
         experiment_data["mse_test"] = np.mean(mse_validation)
+        experiment_data["mse_train_variance"] = np.var(mse_train)
+        experiment_data["mse_test_variance"] = np.var(mse_validation)
 
         experiment_data["acc_train"] = np.mean(accuracy_train)
         experiment_data["acc_test"] = np.mean(accuracy_validation)
+        experiment_data["acc_train_variance"] = np.var(accuracy_train)
+        experiment_data["acc_validation_variance"] = np.var(accuracy_validation)
 
         results.append(experiment_data)
 
@@ -111,7 +112,7 @@ if __name__ == "__main__":
 
     (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
 
-    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5, epochs=200)
+    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5, epochs=400)
 
     X_train = one_hot(X_train)
 

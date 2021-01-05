@@ -177,7 +177,7 @@ class NeuralNetwork:
 if __name__ == "__main__":
     print("Neural network tests")
 
-    X, Y = load_monk(2)
+    X, Y = load_monk(1)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
