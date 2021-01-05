@@ -141,7 +141,7 @@ class NeuralNetwork:
         :return:
         """
         X = self.predict(X)
-        treshold_list = [[1] if i > 0.5 else [0] for i in X]
+        treshold_list = [1 if i > 0.5 else 0 for i in X]
 
         return classification_accuracy(treshold_list, labels)
 
@@ -177,36 +177,35 @@ class NeuralNetwork:
 if __name__ == "__main__":
     print("Neural network tests")
 
-    X, Y = load_monk(3)
+    X, Y = load_monk(2)
 
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(one_hot(X[0])[0]), "activation": "linear"},
                             # input only for dimension, insert linear
-                            {"neurons": 100, "activation": "tanh"},
-                            {"neurons": 1, "activation": "linear"}  # output
+                            {"neurons": 10, "activation": "tanh"},
+                            {"neurons": 1, "activation": "tanh"}  # output
                         ],
-                        'solver': 'extreme_adam',
+                        'solver': 'sgd',
                         "problem": "classification"
                         })
 
     nn.fit(X=one_hot(X[0]),
            labels=[[i] for i in X[1]],
-           hyperparameters={"lambda": 0, "stepsize": 0.001, "momentum": 0.9, "epsilon": 0.009},
+           X_validation=one_hot(Y[0]),
+           labels_validation=[[i] for i in Y[1]],
+           hyperparameters={"lambda": 0, "stepsize": 1, "momentum": 0.5, "epsilon": 0.009},
            epochs=1000,
            batch_size=32, )
 
     print("\nMean square error: train set")
-    print(nn.score(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
+    print(nn.score_mse(X=one_hot(X[0]), labels=[[i] for i in X[1]]))
 
     print("\nMean square error: test set")
-    print(nn.score(X=one_hot(Y[0]), labels=[[i] for i in Y[1]]))
-
-    treshold_list_train = [1 if i > 0.5 else 0 for i in nn.predict(one_hot(X[0]))]
-    treshold_list_test = [1 if i > 0.5 else 0 for i in nn.predict(one_hot(Y[0]))]
+    print(nn.score_mse(X=one_hot(Y[0]), labels=[[i] for i in Y[1]]))
 
     print("\nClassification accuracy training set:")
-    print(classification_accuracy(output=treshold_list_train, target=X[1]))
+    print(nn.score_accuracy(one_hot(X[0]), X[1]))
 
     print("\nClassification accuracy test set:")
-    print(classification_accuracy(output=treshold_list_test, target=Y[1]))
+    print(nn.score_accuracy(one_hot(Y[0]), Y[1]))
