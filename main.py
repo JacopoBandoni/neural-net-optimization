@@ -9,7 +9,7 @@ from Sources.tools.useful import k_fold, grid_search
 
 if __name__ == "__main__":
     grid_parameters = {"lambda": [0, 0.001],
-                       "stepsize": [0.8, 0.4],
+                       "stepsize": [0.4, 0.01],
                        "momentum": [0, 0.5],
                        "neurons": [5, 10]
                        }
@@ -44,7 +44,7 @@ if __name__ == "__main__":
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
                                 ],
-                                'solver': 'sgd',
+                                'solver': 'adam',
                                 "problem": "classification"
                                 })
 
@@ -61,8 +61,8 @@ if __name__ == "__main__":
                    epochs=1000, batch_size=32, shuffle=True)
 
             # to visualize plot for each configuration test
-            #nn.plot_graph()
-            #input()
+            nn.plot_graph()
+            input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
