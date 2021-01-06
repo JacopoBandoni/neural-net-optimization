@@ -5,23 +5,19 @@ from Sources.neural_network import NeuralNetwork
 from Sources.tools.load_dataset import load_monk
 from itertools import product
 from Sources.tools.preprocessing import one_hot
-from Sources.tools.score_function import classification_accuracy
+from Sources.tools.useful import k_fold
 
 
-def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int, epochs:int):
+def grid_search(X, Y, hyperparameters: dict, fold_number: int, epochs:int):
+
     configurations = [dict(zip(hyperparameters, v)) for v in product(*hyperparameters.values())]
-
     results = []
     for config in configurations:
         print("Testing configuration", config)
 
-        X_train = one_hot(X_train)
+        X = one_hot(X)
 
-        # dividing dataset
-        partition_len = int(len(X_train) / fold_number)
-        rest_of_patterns = len(X_train) % fold_number
-        X_partitioned = [X_train[i:i + partition_len] for i in range(0, len(X_train) - rest_of_patterns, partition_len)]
-        Y_partitioned = [Y_train[i:i + partition_len] for i in range(0, len(Y_train) - rest_of_patterns, partition_len)]
+        (x_train, y_train), (x_validation, y_validation) = k_fold(X, Y, fold_number)
 
         # to mean result
         mse_train = []
@@ -31,20 +27,10 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
 
         for fold in range(1, fold_number):
 
-            # creating partition mutually exclusive
-            x_subset = X_partitioned[:fold] + X_partitioned[fold+1:]
-            x_train = np.concatenate(x_subset)
-
-            y_subset = Y_partitioned[:fold] + Y_partitioned[fold + 1:]
-            y_train = np.concatenate(y_subset)
-
-            x_validation = np.array(X_partitioned[fold])
-            y_validation = np.array(Y_partitioned[fold])
-
-            # train the network over set
+            # build the network
             nn = NeuralNetwork({'seed': 0,
                                 'layers': [
-                                    {"neurons": len(x_train[0]), "activation": "linear"},
+                                    {"neurons": len(x_train[fold][0]), "activation": "linear"},
                                     # input only for dimension, insert linear
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
@@ -53,10 +39,10 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                 "problem": "classification"
                                 })
 
-            nn.fit(X=x_train,
-                   labels=[[i] for i in y_train],
-                   X_validation=x_validation,
-                   labels_validation=[[i] for i in y_validation],
+            nn.fit(X=x_train[fold],
+                   labels=[[i] for i in y_train[fold]],
+                   X_validation=x_validation[fold],
+                   labels_validation=[[i] for i in y_validation[fold]],
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
@@ -113,7 +99,7 @@ if __name__ == "__main__":
 
     (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
 
-    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5, epochs=400)
+    grid_search(X_train, y_train, grid_parameters, fold_number=5, epochs=400)
 
     X_train = one_hot(X_train)
 
