@@ -5,69 +5,64 @@ from Sources.neural_network import NeuralNetwork
 from Sources.tools.load_dataset import load_monk
 from itertools import product
 from Sources.tools.preprocessing import one_hot
-from Sources.tools.score_function import classification_accuracy
+from Sources.tools.useful import k_fold, grid_search
 
+if __name__ == "__main__":
+    grid_parameters = {"lambda": [0, 0.001],
+                       "stepsize": [0.4, 0.01],
+                       "momentum": [0, 0.5],
+                       "neurons": [5, 10]
+                       }
 
-def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int, epochs:int):
-    configurations = [dict(zip(hyperparameters, v)) for v in product(*hyperparameters.values())]
+    # load dataset
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
+    # if is classification
+    X_train = one_hot(X_train)
 
+    # load configurations to test
+    configurations = grid_search(grid_parameters)
+
+    # for each configuration produced by grid search build and train model over k fold
     results = []
     for config in configurations:
         print("Testing configuration", config)
-
-        X_train = one_hot(X_train)
-
-        # dividing dataset
-        partition_len = int(len(X_train) / fold_number)
-        rest_of_patterns = len(X_train) % fold_number
-        X_partitioned = [X_train[i:i + partition_len] for i in range(0, len(X_train) - rest_of_patterns, partition_len)]
-        Y_partitioned = [Y_train[i:i + partition_len] for i in range(0, len(Y_train) - rest_of_patterns, partition_len)]
+        # produce set mutually exclusive
+        X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=5)
 
         # to mean result
         mse_train = []
         mse_validation = []
         accuracy_train = []
         accuracy_validation = []
+        for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
 
-        for fold in range(1, fold_number):
-
-            # creating partition mutually exclusive
-            x_subset = X_partitioned[:fold] + X_partitioned[fold+1:]
-            x_train = np.concatenate(x_subset)
-
-            y_subset = Y_partitioned[:fold] + Y_partitioned[fold + 1:]
-            y_train = np.concatenate(y_subset)
-
-            x_validation = np.array(X_partitioned[fold])
-            y_validation = np.array(Y_partitioned[fold])
-
-            # train the network over set
+            # build and train the network
             nn = NeuralNetwork({'seed': 0,
                                 'layers': [
-                                    {"neurons": len(x_train[0]), "activation": "linear"},
+                                    {"neurons": len(x_t[0]), "activation": "linear"},
                                     # input only for dimension, insert linear
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
                                 ],
-                                'solver': 'sgd',
+                                'solver': 'adam',
                                 "problem": "classification"
                                 })
 
-            nn.fit(X=x_train,
-                   labels=[[i] for i in y_train],
-                   X_validation=x_validation,
-                   labels_validation=[[i] for i in y_validation],
+            # y must be a column vector, not row one
+            y_t = [[i] for i in y_t]
+            y_v = [[i] for i in y_v]
+
+            nn.fit(X=x_t, labels=y_t,
+                   X_validation=x_v, labels_validation=y_v,
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
-                                    "epsilon": config["epsilon"]},
-                   epochs=epochs,
-                   batch_size=32,
-                   shuffle=True)
+                                    "epsilon": 0.0001},
+                   epochs=1000, batch_size=32, shuffle=True)
 
             # to visualize plot for each configuration test
-            # nn.plot_graph()
-            # input()
+            nn.plot_graph()
+            input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
@@ -75,6 +70,7 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
             accuracy_train.append(nn.history["acc_train"][-1])
             accuracy_validation.append(nn.history["acc_validation"][-1])
 
+        # over k fold compute mean
         experiment_data = {}
         for name in config:
             experiment_data[name] = config[name]
@@ -103,19 +99,3 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
     except IOError:
         print("Csv writing error")
 
-
-if __name__ == "__main__":
-    grid_parameters = {"lambda": [0],
-                       "stepsize": [1],
-                       "momentum": [0.5],
-                       "neurons": [10],
-                       "epsilon": [0.009]
-                       }
-
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
-
-    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5, epochs=100)
-
-    X_train = one_hot(X_train)
-
-    # TODO remember to train the final model over train+validation
