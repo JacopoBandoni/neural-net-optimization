@@ -5,55 +5,64 @@ from Sources.neural_network import NeuralNetwork
 from Sources.tools.load_dataset import load_monk
 from itertools import product
 from Sources.tools.preprocessing import one_hot
-from Sources.tools.useful import k_fold
+from Sources.tools.useful import k_fold, grid_search
 
+if __name__ == "__main__":
+    grid_parameters = {"lambda": [0, 0.001],
+                       "stepsize": [0.8, 0.4],
+                       "momentum": [0, 0.5],
+                       "neurons": [5, 10]
+                       }
 
-def grid_search(X, Y, hyperparameters: dict, fold_number: int, epochs:int):
+    # load dataset
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
+    # if is classification
+    X_train = one_hot(X_train)
 
-    configurations = [dict(zip(hyperparameters, v)) for v in product(*hyperparameters.values())]
+    # load configurations to test
+    configurations = grid_search(grid_parameters)
+
+    # for each configuration produced by grid search build and train model over k fold
     results = []
     for config in configurations:
         print("Testing configuration", config)
-
-        X = one_hot(X)
-
-        (x_train, y_train), (x_validation, y_validation) = k_fold(X, Y, fold_number)
+        # produce set mutually exclusive
+        X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=5)
 
         # to mean result
         mse_train = []
         mse_validation = []
         accuracy_train = []
         accuracy_validation = []
+        for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
 
-        for fold in range(1, fold_number):
-
-            # build the network
+            # build and train the network
             nn = NeuralNetwork({'seed': 0,
                                 'layers': [
-                                    {"neurons": len(x_train[fold][0]), "activation": "linear"},
+                                    {"neurons": len(x_t[0]), "activation": "linear"},
                                     # input only for dimension, insert linear
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
                                 ],
-                                'solver': 'adam',
+                                'solver': 'sgd',
                                 "problem": "classification"
                                 })
 
-            nn.fit(X=x_train[fold],
-                   labels=[[i] for i in y_train[fold]],
-                   X_validation=x_validation[fold],
-                   labels_validation=[[i] for i in y_validation[fold]],
+            # y must be a column vector, not row one
+            y_t = [[i] for i in y_t]
+            y_v = [[i] for i in y_v]
+
+            nn.fit(X=x_t, labels=y_t,
+                   X_validation=x_v, labels_validation=y_v,
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
                                     "epsilon": 0.0001},
-                   epochs=epochs,
-                   batch_size=32,
-                   shuffle=True)
+                   epochs=1000, batch_size=32, shuffle=True)
 
             # to visualize plot for each configuration test
-            nn.plot_graph()
-            input()
+            #nn.plot_graph()
+            #input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
@@ -61,6 +70,7 @@ def grid_search(X, Y, hyperparameters: dict, fold_number: int, epochs:int):
             accuracy_train.append(nn.history["acc_train"][-1])
             accuracy_validation.append(nn.history["acc_validation"][-1])
 
+        # over k fold compute mean
         experiment_data = {}
         for name in config:
             experiment_data[name] = config[name]
@@ -89,18 +99,3 @@ def grid_search(X, Y, hyperparameters: dict, fold_number: int, epochs:int):
     except IOError:
         print("Csv writing error")
 
-
-if __name__ == "__main__":
-    grid_parameters = {"lambda": [0, 0.001],
-                       "stepsize": [1, 0.5],
-                       "momentum": [0, 0.5],
-                       "neurons": [5, 10]
-                       }
-
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
-
-    grid_search(X_train, y_train, grid_parameters, fold_number=5, epochs=400)
-
-    X_train = one_hot(X_train)
-
-    # TODO remember to train the final model over train+validation

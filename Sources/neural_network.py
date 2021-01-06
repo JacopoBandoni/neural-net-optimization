@@ -51,7 +51,6 @@ class NeuralNetwork:
 
         self.__initialize_weights()
 
-        print("Neural network initialized")
 
     def __initialize_weights(self):
         self.weights = {}
@@ -83,22 +82,22 @@ class NeuralNetwork:
             raise Exception("Epoch number error")
 
         if self.solver == "sgd":
-            print("\nRunning sgd")
+            print("Running sgd")
             self.history = sgd(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
                                X_validation, labels_validation)
 
         elif self.solver == "adam":
-            print("\nRunning adam")
+            print("Running adam")
             self.history = adam(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
                                 X_validation, labels_validation)
 
         elif self.solver == "extreme_adam":
-            print("\nRunning adam")
+            print("Running adam")
             self.history = extreme_adam(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
                                         X_validation, labels_validation)
 
         elif self.solver == "cholesky":
-            print("\nRunning cholesky")
+            print("Running cholesky")
 
             if self.layers[-1]["activation"] != "linear":
                 raise Exception("Per cholesky l'ultima funzione di attivazione deve mecessariamente essere lineare")

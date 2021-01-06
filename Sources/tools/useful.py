@@ -1,3 +1,5 @@
+from itertools import product
+
 import numpy as np
 import random
 
@@ -67,7 +69,17 @@ def k_fold(X, labels, fold_number):
         X_validation.append(x_validation)
         Y_validation.append(y_validation)
 
-    return (X_train, Y_train), (X_validation, Y_validation)
+    return X_train, Y_train, X_validation, Y_validation
+
+
+def grid_search(hyperparameters:dict):
+    """
+    Returns list of dictionary with all possible configurations
+    :param hyperparameters:
+    :return:
+    """
+    configurations = [dict(zip(hyperparameters, v)) for v in product(*hyperparameters.values())]
+    return configurations
 
 
 # main used for test output

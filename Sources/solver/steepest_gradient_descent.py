@@ -66,14 +66,14 @@ def sgd(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: in
             accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
         # how to plot accuracy on regression?
 
-        if mse_train[i] <= hyperparameters["epsilon"]:
-            print("\nStopping condition raggiunta:\nerrore = " + str(mse_train[i]))
+        if mse_validation[i] <= hyperparameters["epsilon"]:
+            print("Stopping condition raggiunta, errore = " + str(mse_validation[i]))
             break
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
-        print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
+        # print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
 
     history["mse_train"] = mse_train
     history["mse_validation"] = mse_validation
