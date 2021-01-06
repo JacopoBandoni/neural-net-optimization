@@ -206,9 +206,9 @@ if __name__ == "__main__":
     print(nn.score_mse(X=one_hot(Y[0]), labels=[[i] for i in Y[1]]))
 
     print("\nClassification accuracy training set:")
-    print(nn.score_accuracy(one_hot(X[0]), X[1]))
+    print(nn.score_accuracy(one_hot(X[0]), [[i] for i in X[1]]))
 
     print("\nClassification accuracy test set:")
-    print(nn.score_accuracy(one_hot(Y[0]), Y[1]))
+    print(nn.score_accuracy(one_hot(Y[0]), [[i] for i in Y[1]]))
 
     nn.plot_graph()

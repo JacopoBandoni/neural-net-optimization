@@ -49,7 +49,7 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
                                 ],
-                                'solver': 'adam',
+                                'solver': 'sgd',
                                 "problem": "classification"
                                 })
 
@@ -60,14 +60,14 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
-                                    "epsilon": 0.0001},
+                                    "epsilon": config["epsilon"]},
                    epochs=epochs,
                    batch_size=32,
                    shuffle=True)
 
             # to visualize plot for each configuration test
-            nn.plot_graph()
-            input()
+            # nn.plot_graph()
+            # input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
@@ -105,15 +105,16 @@ def grid_search_k_fold(X_train, Y_train, hyperparameters: dict, fold_number: int
 
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0, 0.001],
-                       "stepsize": [1, 0.5],
-                       "momentum": [0, 0.5],
-                       "neurons": [5, 10]
+    grid_parameters = {"lambda": [0],
+                       "stepsize": [1],
+                       "momentum": [0.5],
+                       "neurons": [10],
+                       "epsilon": [0.009]
                        }
 
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
 
-    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5, epochs=400)
+    grid_search_k_fold(X_train, y_train, grid_parameters, fold_number=5, epochs=100)
 
     X_train = one_hot(X_train)
 
