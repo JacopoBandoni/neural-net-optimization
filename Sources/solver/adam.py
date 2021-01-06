@@ -96,7 +96,6 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
                                           (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam))  # - \
                 # hyperparameters["lambda"] * weights["b" + str(j)]
 
-
         # save mse
         mse_train.append(model.score_mse(X, labels))
         mse_validation.append(model.score_mse(X_validation, labels_validation))
@@ -113,7 +112,6 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
-
 
     history["mse_train"] = mse_train
     history["mse_validation"] = mse_validation
