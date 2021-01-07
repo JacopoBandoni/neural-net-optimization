@@ -8,14 +8,14 @@ from Sources.tools.preprocessing import one_hot
 from Sources.tools.useful import k_fold, grid_search
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0, 0.001],
-                       "stepsize": [0.4, 0.01],
-                       "momentum": [0, 0.5],
-                       "batch_size": [32, 64],
+    grid_parameters = {"lambda": [0.001, 0.01],
+                       "stepsize": [0.6, 0.01],
+                       "momentum": [0.01, 0.5],
+                       "batch_size": [32, 1], # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [2, 4],
+                       "layer_number": [2, 6],
                        # for each layer the element to test
-                       "neuron": [5, 10],
+                       "neuron": [5],
                        "activation": ["sigmoid", "tanh"],
                        "activation_output": ["sigmoid", "tanh"]
                        }
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # save results to csv file
     csv_columns = results[0].keys()
-    filename = "results.csv"
+    filename = "csv_results/monk1_outher_sgd.csv"
     try:
         with open(filename, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
