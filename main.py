@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
             # build and train the network
             nn = NeuralNetwork({'seed': 0,
-                                'layers': topologys,
+                                'layers': topology,
                                 'solver': 'sgd',
                                 "problem": "classification"
                                 })
