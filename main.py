@@ -11,23 +11,28 @@ if __name__ == "__main__":
     grid_parameters = {"lambda": [0, 0.001],
                        "stepsize": [0.4, 0.01],
                        "momentum": [0, 0.5],
-                       "neurons": [5, 10]
+                       "batch_size": [32, 64],
+                       # insert number of HIDDEN layer where you will insert hyperparams
+                       "layer_number": [2, 4],
+                       # for each layer the element to test
+                       "neuron": [5, 10],
+                       "activation": ["sigmoid", "tanh"],
+                       "activation_output": ["sigmoid", "tanh"]
                        }
 
     # load dataset
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
     # if is classification
     X_train = one_hot(X_train)
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
-
     # for each configuration produced by grid search build and train model over k fold
     results = []
-    for config in configurations:
-        print("Testing configuration", config)
+    for count, config in enumerate(configurations):
+        print("Testing configuration", count, "(", len(configurations), "):", config)
         # produce set mutually exclusive
-        X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=5)
+        X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=3)
 
         # to mean result
         mse_train = []
@@ -36,15 +41,20 @@ if __name__ == "__main__":
         accuracy_validation = []
         for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
 
+            # function to build topology
+            topology = []
+            for dim in range(0, config["layer_number"]+2):
+                if dim == 0:    # first layer
+                    topology.append({"neurons": len(x_t[0]), "activation": "linear"})
+                elif dim == config["layer_number"]+1:   # last layer
+                    topology.append({"neurons": 1, "activation": config["activation_output"]})
+                else:   # hidden layers
+                    topology.append({"neurons": config["neuron"], "activation": config["activation"]})
+
             # build and train the network
             nn = NeuralNetwork({'seed': 0,
-                                'layers': [
-                                    {"neurons": len(x_t[0]), "activation": "linear"},
-                                    # input only for dimension, insert linear
-                                    {"neurons": config["neurons"], "activation": "tanh"},
-                                    {"neurons": 1, "activation": "tanh"}  # output
-                                ],
-                                'solver': 'adam',
+                                'layers': topology,
+                                'solver': 'sgd',
                                 "problem": "classification"
                                 })
 
@@ -58,11 +68,11 @@ if __name__ == "__main__":
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
                                     "epsilon": 0.0001},
-                   epochs=1000, batch_size=32, shuffle=True)
+                   epochs=600, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
-            nn.plot_graph()
-            input()
+            # nn.plot_graph()
+            # input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
