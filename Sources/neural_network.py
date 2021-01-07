@@ -156,7 +156,7 @@ class NeuralNetwork:
 
     def plot_graph(self):
         plt.plot(self.history['acc_train'])
-        plt.plot(self.history['acc_validation'])
+        plt.plot(self.history['acc_validation'], linestyle="--")
         plt.title('model accuracy')
         plt.ylabel('accuracy')
         plt.xlabel('epoch')
@@ -164,7 +164,7 @@ class NeuralNetwork:
         plt.show()
         # "Loss"
         plt.plot(self.history['mse_train'])
-        plt.plot(self.history['mse_validation'])
+        plt.plot(self.history['mse_validation'], linestyle="--")
         plt.title('model error')
         plt.ylabel('error')
         plt.xlabel('epoch')

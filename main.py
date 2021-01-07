@@ -11,22 +11,26 @@ if __name__ == "__main__":
     grid_parameters = {"lambda": [0, 0.001],
                        "stepsize": [0.4, 0.01],
                        "momentum": [0, 0.5],
+                       "epsilon": [0.009],
                        "batch_size": [32, 64],
                        # insert number of HIDDEN layer where you will insert hyperparams
                        "layer_number": [2, 4],
                        # for each layer the element to test
                        "neuron": [5, 10],
                        "activation": ["sigmoid", "tanh"],
-                       "activation_output": ["sigmoid", "tanh"]
+                       "activation_output": ["sigmoid", "tanh"],
                        }
 
+    epochs = 600
+
     # load dataset
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
     # if is classification
     X_train = one_hot(X_train)
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
+
     # for each configuration produced by grid search build and train model over k fold
     results = []
     for count, config in enumerate(configurations):
@@ -67,12 +71,12 @@ if __name__ == "__main__":
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
-                                    "epsilon": 0.0001},
-                   epochs=600, batch_size=config["batch_size"], shuffle=True)
+                                    "epsilon": config["epsilon"]},
+                   epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
-            # nn.plot_graph()
-            # input()
+            #nn.plot_graph()
+            #input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])

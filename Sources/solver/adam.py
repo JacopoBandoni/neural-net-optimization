@@ -23,6 +23,8 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
     :return:
     """
 
+    batch_iter = 0
+
     # needed to plot graph
     history = {}
     accuracy_train = []
@@ -62,6 +64,8 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
 
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
+            batch_iter = 1
+
             # forward propagatiom
             output, forward_cache = __forward_pass(Xi, model.weights, model.layers, True)
 
@@ -72,28 +76,28 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
             for j in range(1, len(model.layers)):
                 # update moment estimates
                 momentum_1_w["W" + str(j)] = ((1 - beta_1) * deltaW["W" + str(j)]) + (
-                            beta_1 * momentum_1_w["W" + str(j)])
+                        beta_1 * momentum_1_w["W" + str(j)])
                 momentum_2_w["W" + str(j)] = ((1 - beta_2) * (deltaW["W" + str(j)] ** 2)) + (
-                            beta_2 * momentum_2_w["W" + str(j)])
+                        beta_2 * momentum_2_w["W" + str(j)])
                 momentum_1_b["b" + str(j)] = ((1 - beta_1) * deltab["b" + str(j)]) + (
-                            beta_1 * momentum_1_b["b" + str(j)])
+                        beta_1 * momentum_1_b["b" + str(j)])
                 momentum_2_b["b" + str(j)] = ((1 - beta_2) * (deltab["b" + str(j)] ** 2)) + (
-                            beta_2 * momentum_2_b["b" + str(j)])
+                        beta_2 * momentum_2_b["b" + str(j)])
 
                 # compute bias correction
-                momentum_1_w_cap["W" + str(j)] = momentum_1_w["W" + str(j)] / (1 - (beta_1 ** (i + 1)))
-                momentum_2_w_cap["W" + str(j)] = momentum_2_w["W" + str(j)] / (1 - (beta_2 ** (i + 1)))
-                momentum_1_b_cap["b" + str(j)] = momentum_1_b["b" + str(j)] / (1 - (beta_1 ** (i + 1)))
-                momentum_2_b_cap["b" + str(j)] = momentum_2_b["b" + str(j)] / (1 - (beta_2 ** (i + 1)))
+                momentum_1_w_cap["W" + str(j)] = momentum_1_w["W" + str(j)] / (1 - (beta_1 ** (i * batch_iter + 1)))
+                momentum_2_w_cap["W" + str(j)] = momentum_2_w["W" + str(j)] / (1 - (beta_2 ** (i * batch_iter + 1)))
+                momentum_1_b_cap["b" + str(j)] = momentum_1_b["b" + str(j)] / (1 - (beta_1 ** (i * batch_iter + 1)))
+                momentum_2_b_cap["b" + str(j)] = momentum_2_b["b" + str(j)] / (1 - (beta_2 ** (i * batch_iter + 1)))
 
                 # update weight values
                 model.weights["W" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_w_cap["W" + str(j)]) /
-                                          (np.sqrt(momentum_2_w_cap["W" + str(j)]) + epsilon_adam)) - \
-                                         2*hyperparameters["lambda"] * model.weights["W" + str(j)]
+                                                (np.sqrt(momentum_2_w_cap["W" + str(j)]) + epsilon_adam)) - \
+                                               2 * hyperparameters["lambda"] * model.weights["W" + str(j)]
 
                 # update bias
                 model.weights["b" + str(j)] += ((hyperparameters["stepsize"] * momentum_1_b_cap["b" + str(j)]) /
-                                          (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam))  # - \
+                                                (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam))  # - \
                 # hyperparameters["lambda"] * weights["b" + str(j)]
 
         # save mse

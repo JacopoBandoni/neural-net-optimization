@@ -111,7 +111,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
-        print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
+        #print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
 
     history["mse_train"] = mse_train
     history["mse_validation"] = mse_validation
