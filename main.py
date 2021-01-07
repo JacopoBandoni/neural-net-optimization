@@ -19,6 +19,7 @@ if __name__ == "__main__":
                        "neuron": [5, 10],
                        "activation": ["sigmoid", "tanh"],
                        "activation_output": ["sigmoid", "tanh"],
+                       "initialization": ["uniform"]
                        }
 
     epochs = 600
@@ -59,7 +60,8 @@ if __name__ == "__main__":
             nn = NeuralNetwork({'seed': 0,
                                 'layers': topology,
                                 'solver': 'sgd',
-                                "problem": "classification"
+                                "problem": "classification",
+                                "initialization": config["initialization"]
                                 })
 
             # y must be a column vector, not row one
