@@ -11,7 +11,8 @@ if __name__ == "__main__":
     grid_parameters = {"lambda": [0, 0.001],
                        "stepsize": [0.4, 0.01],
                        "momentum": [0, 0.5],
-                       "neurons": [5, 10]
+                       "neurons": [5, 10],
+                       "batch_size": [32, 64]
                        }
 
     # load dataset
@@ -21,7 +22,8 @@ if __name__ == "__main__":
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
-
+    print(configurations[5])
+    input()
     # for each configuration produced by grid search build and train model over k fold
     results = []
     for config in configurations:
@@ -44,7 +46,7 @@ if __name__ == "__main__":
                                     {"neurons": config["neurons"], "activation": "tanh"},
                                     {"neurons": 1, "activation": "tanh"}  # output
                                 ],
-                                'solver': 'adam',
+                                'solver': 'sgd',
                                 "problem": "classification"
                                 })
 
@@ -58,7 +60,7 @@ if __name__ == "__main__":
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
                                     "epsilon": 0.0001},
-                   epochs=1000, batch_size=32, shuffle=True)
+                   epochs=1000, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
             nn.plot_graph()
