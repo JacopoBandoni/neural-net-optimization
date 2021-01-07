@@ -11,8 +11,15 @@ if __name__ == "__main__":
     grid_parameters = {"lambda": [0, 0.001],
                        "stepsize": [0.4, 0.01],
                        "momentum": [0, 0.5],
-                       "neurons": [5, 10],
-                       "batch_size": [32, 64]
+                       "batch_size": [32, 64],
+                       # insert number of HIDDEN layer where you will insert hyperparams
+                       "layer_number": [2],
+                       # for each hidden layer insert values to test
+                       "neuron_1": [5, 10],
+                       "activation_1": ["sigmoid", "tanh"],
+                       "neuron_2": [15, 20],
+                       "activation_2": ["sigmoid", "tanh"],
+                       "activation_output": ["sigmoid", "tanh"]
                        }
 
     # load dataset
@@ -22,8 +29,6 @@ if __name__ == "__main__":
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
-    print(configurations[5])
-    input()
     # for each configuration produced by grid search build and train model over k fold
     results = []
     for config in configurations:
@@ -38,14 +43,19 @@ if __name__ == "__main__":
         accuracy_validation = []
         for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
 
+            # function to build topology
+            topology = []
+            for dim in range(0, config["layer_number"]+2):
+                if dim == 0:    # first layer
+                    topology.append({"neurons": len(x_t[0]), "activation": "linear"})
+                elif dim == config["layer_number"]+1:   # last layer
+                    topology.append({"neurons": 1, "activation": config["activation_output"]})
+                else:   # hidden layers
+                    topology.append({"neurons": config["neuron_"+str(dim)], "activation": config["activation_"+str(dim)]})
+
             # build and train the network
             nn = NeuralNetwork({'seed': 0,
-                                'layers': [
-                                    {"neurons": len(x_t[0]), "activation": "linear"},
-                                    # input only for dimension, insert linear
-                                    {"neurons": config["neurons"], "activation": "tanh"},
-                                    {"neurons": 1, "activation": "tanh"}  # output
-                                ],
+                                'layers': topologys,
                                 'solver': 'sgd',
                                 "problem": "classification"
                                 })
