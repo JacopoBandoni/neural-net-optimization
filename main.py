@@ -13,12 +13,10 @@ if __name__ == "__main__":
                        "momentum": [0, 0.5],
                        "batch_size": [32, 64],
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [2],
-                       # for each hidden layer insert values to test
-                       "neuron_1": [5, 10],
-                       "activation_1": ["sigmoid", "tanh"],
-                       "neuron_2": [15, 20],
-                       "activation_2": ["sigmoid", "tanh"],
+                       "layer_number": [4, 8],
+                       # for each layer the element to test
+                       "neuron": [5, 10],
+                       "activation": ["sigmoid", "tanh"],
                        "activation_output": ["sigmoid", "tanh"]
                        }
 
@@ -51,7 +49,7 @@ if __name__ == "__main__":
                 elif dim == config["layer_number"]+1:   # last layer
                     topology.append({"neurons": 1, "activation": config["activation_output"]})
                 else:   # hidden layers
-                    topology.append({"neurons": config["neuron_"+str(dim)], "activation": config["activation_"+str(dim)]})
+                    topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
             # build and train the network
             nn = NeuralNetwork({'seed': 0,
@@ -73,8 +71,8 @@ if __name__ == "__main__":
                    epochs=600, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
-            nn.plot_graph()
-            input()
+            # nn.plot_graph()
+            # input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
