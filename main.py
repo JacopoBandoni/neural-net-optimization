@@ -13,7 +13,7 @@ if __name__ == "__main__":
                        "momentum": [0, 0.5],
                        "batch_size": [32, 64],
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [4, 8],
+                       "layer_number": [2, 4],
                        # for each layer the element to test
                        "neuron": [5, 10],
                        "activation": ["sigmoid", "tanh"],
@@ -29,8 +29,8 @@ if __name__ == "__main__":
     configurations = grid_search(grid_parameters)
     # for each configuration produced by grid search build and train model over k fold
     results = []
-    for config in configurations:
-        print("Testing configuration", config)
+    for count, config in enumerate(configurations):
+        print("Testing configuration", count, "(", len(configurations), "):", config)
         # produce set mutually exclusive
         X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=3)
 

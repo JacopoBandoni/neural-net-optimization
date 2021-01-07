@@ -8,7 +8,7 @@ from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
 from Sources.tools.preprocessing import one_hot
 from Sources.tools.load_dataset import *
-from Sources.tools.weight_initialization import xavier_init
+from Sources.tools.weight_initialization import xavier_init, uniform_weights
 import matplotlib.pyplot as plt
 
 
@@ -56,8 +56,7 @@ class NeuralNetwork:
         self.weights = {}
 
         for i in range(1, len(self.layers)):
-            self.weights['W' + str(i)] = xavier_init((self.layers[i - 1]["neurons"], self.layers[i]["neurons"]),
-                                                     self.layers[0]["neurons"], self.layers[-1]["neurons"])
+            self.weights['W' + str(i)] = uniform_weights((self.layers[i - 1]["neurons"], self.layers[i]["neurons"]))
 
             self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
