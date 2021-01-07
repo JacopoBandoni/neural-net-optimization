@@ -70,7 +70,7 @@ if __name__ == "__main__":
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
                                     "epsilon": 0.0001},
-                   epochs=1000, batch_size=config["batch_size"], shuffle=True)
+                   epochs=600, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
             nn.plot_graph()
