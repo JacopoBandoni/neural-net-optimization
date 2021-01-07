@@ -11,14 +11,18 @@ if __name__ == "__main__":
     grid_parameters = {"lambda": [0.001, 0.01],
                        "stepsize": [0.6, 0.01],
                        "momentum": [0.01, 0.5],
+                       "epsilon": [0.009],
                        "batch_size": [32, 1], # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
                        "layer_number": [2, 6],
                        # for each layer the element to test
                        "neuron": [5],
                        "activation": ["sigmoid", "tanh"],
-                       "activation_output": ["sigmoid", "tanh"]
+                       "activation_output": ["sigmoid", "tanh"],
+                       "initialization": ["uniform"]
                        }
+
+    epochs = 600
 
     # load dataset
     (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
@@ -55,7 +59,8 @@ if __name__ == "__main__":
             nn = NeuralNetwork({'seed': 0,
                                 'layers': topology,
                                 'solver': 'sgd',
-                                "problem": "classification"
+                                "problem": "classification",
+                                "initialization": config["initialization"]
                                 })
 
             # y must be a column vector, not row one
@@ -67,8 +72,8 @@ if __name__ == "__main__":
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
                                     "momentum": config["momentum"],
-                                    "epsilon": 0.0001},
-                   epochs=600, batch_size=config["batch_size"], shuffle=True)
+                                    "epsilon": config["epsilon"]},
+                   epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
             # nn.plot_graph()
@@ -99,7 +104,7 @@ if __name__ == "__main__":
 
     # save results to csv file
     csv_columns = results[0].keys()
-    filename = "csv_results/monk1_outher_sgd.csv"
+    filename = "results.csv"
     try:
         with open(filename, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
