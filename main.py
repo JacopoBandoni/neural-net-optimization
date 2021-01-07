@@ -23,7 +23,7 @@ if __name__ == "__main__":
                        }
 
     # load dataset
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
     # if is classification
     X_train = one_hot(X_train)
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     for config in configurations:
         print("Testing configuration", config)
         # produce set mutually exclusive
-        X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=5)
+        X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=3)
 
         # to mean result
         mse_train = []
