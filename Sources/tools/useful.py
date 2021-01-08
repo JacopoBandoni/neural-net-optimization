@@ -42,6 +42,7 @@ def k_fold(X, labels, fold_number):
     :param epochs:
     :return:
     """
+    X, labels = unison_shuffle(X, labels)
 
     # dividing dataset
     partition_len = int(len(X) / fold_number)

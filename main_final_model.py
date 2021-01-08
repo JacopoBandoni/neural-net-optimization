@@ -25,8 +25,7 @@ if __name__ == "__main__":
         nn = NeuralNetwork({'seed': 0,
                             'layers': [
                                 {"neurons": len(x_t[0]), "activation": "linear"},
-                                {"neurons": 5, "activation": "sigmoid"},
-                                {"neurons": 5, "activation": "sigmoid"},
+                                {"neurons": 3, "activation": "sigmoid"},
                                 {"neurons": 1, "activation": "tanh"}
                             ],
                             'solver': 'sgd',
@@ -39,9 +38,9 @@ if __name__ == "__main__":
 
         nn.fit(X=x_t, labels=y_t,
                X_validation=x_v, labels_validation=y_v,
-               hyperparameters={"lambda": 0.01,
+               hyperparameters={"lambda": 0.0,
                                 "stepsize": 0.3,
-                                "momentum": 0.5,
+                                "momentum": 0.6,
                                 "epsilon": 0.0001
                                 },
                epochs=200, batch_size=len(x_t), shuffle=True)
