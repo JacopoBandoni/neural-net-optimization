@@ -49,16 +49,26 @@ class NeuralNetwork:
         else:
             raise Exception("Problem statement error")
 
+        if "initialization" in settings and settings["initialization"] == "uniform" or settings["initialization"] == "xavier":
+            self.initialization = settings["initialization"]
+        else:
+            raise Exception("Initialization statemenet error")
+
         self.__initialize_weights()
 
 
     def __initialize_weights(self):
         self.weights = {}
+        if self.initialization == "uniform":
+            for i in range(1, len(self.layers)):
+                self.weights['W' + str(i)] = uniform_weights((self.layers[i - 1]["neurons"], self.layers[i]["neurons"]))
 
-        for i in range(1, len(self.layers)):
-            self.weights['W' + str(i)] = uniform_weights((self.layers[i - 1]["neurons"], self.layers[i]["neurons"]))
+                self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
+        elif self.initialization == "xavier":
+            for i in range(1, len(self.layers)):
+                self.weights['W' + str(i)] = xavier_init((self.layers[i - 1]["neurons"], self.layers[i]["neurons"]))
 
-            self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
+                self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
     def fit(self, X, labels, X_validation, labels_validation, hyperparameters: dict, epochs=1, batch_size=32,
             shuffle=True):
@@ -155,20 +165,21 @@ class NeuralNetwork:
                 print(value)
 
     def plot_graph(self):
-        plt.plot(self.history['acc_train'])
-        plt.plot(self.history['acc_validation'], linestyle="--")
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'validation'], loc='upper left')
-        plt.show()
         # "Loss"
         plt.plot(self.history['mse_train'])
         plt.plot(self.history['mse_validation'], linestyle="--")
         plt.title('model error')
         plt.ylabel('error')
         plt.xlabel('epoch')
-        plt.legend(['train', 'validation'], loc='upper left')
+        plt.legend(['train', 'validation'], loc='upper right')
+        plt.show()
+
+        plt.plot(self.history['acc_train'])
+        plt.plot(self.history['acc_validation'], linestyle="--")
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='lower right')
         plt.show()
 
 

@@ -5,15 +5,15 @@ def uniform_weights(shape):
     return np.random.uniform(-0.7, 0.7, shape)
 
 
-def xavier_init(shape, n_i, n_o):
+def xavier_init(shape):
     """
     #:param shape: the shape of the weight to initialize
     #:param n_i: the number of unit in input of the nn
     #:param n_o: the number of unit in output of the nn
     :return: a weight matrix
     """
-
-    return np.random.rand(shape[0], shape[1]) * np.sqrt(1 / (n_i + n_o))
+    threshold = (np.sqrt(6)) / (np.sqrt(shape[0] + shape[1]))
+    return np.random.uniform(-threshold, threshold, shape)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ if __name__ == "__main__":
     X_train = one_hot(X_train)
 
     # produce set mutually exclusive
-    X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=3)
+    X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=10)
 
     # to mean result
     mse_train = []
@@ -22,10 +22,10 @@ if __name__ == "__main__":
     accuracy_validation = []
     for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
         # build and train the network
-        nn = NeuralNetwork({'seed': 0,
+        nn = NeuralNetwork({'seed': 2,
                             'layers': [
                                 {"neurons": len(x_t[0]), "activation": "linear"},
-                                {"neurons": 3, "activation": "sigmoid"},
+                                {"neurons": 5, "activation": "tanh"},
                                 {"neurons": 1, "activation": "tanh"}
                             ],
                             'solver': 'sgd',
@@ -38,16 +38,16 @@ if __name__ == "__main__":
 
         nn.fit(X=x_t, labels=y_t,
                X_validation=x_v, labels_validation=y_v,
-               hyperparameters={"lambda": 0.0,
-                                "stepsize": 0.3,
-                                "momentum": 0.6,
+               hyperparameters={"lambda": 0.000,
+                                "stepsize": 0.9,
+                                "momentum": 0.2,
                                 "epsilon": 0.0001
                                 },
-               epochs=200, batch_size=len(x_t), shuffle=True)
+               epochs=500, batch_size=32, shuffle=True)
 
         # to visualize plot for each configuration test
-        nn.plot_graph()
-        input()
+        # nn.plot_graph()
+        # input()
 
         # store results
         mse_train.append(nn.history["mse_train"][-1])
@@ -63,4 +63,7 @@ if __name__ == "__main__":
     print("ACC TR variance:", np.var(accuracy_train))
     print("ACC VL:", np.mean(accuracy_validation))
     print("ACC VL variance:", np.var(accuracy_validation))
+
+
+    # Model Assesment
 
