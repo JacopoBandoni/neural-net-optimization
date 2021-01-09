@@ -56,7 +56,7 @@ if __name__ == "__main__":
                     topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
             # build and train the network
-            nn = NeuralNetwork({'seed': 0,
+            nn = NeuralNetwork({'seed': np.random.randint(100),
                                 'layers': topology,
                                 'solver': 'sgd',
                                 "problem": "classification",
