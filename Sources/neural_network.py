@@ -166,20 +166,27 @@ class NeuralNetwork:
 
     def plot_graph(self):
         # "Loss"
+        fontsize_legend_axis = 12
         plt.plot(self.history['mse_train'])
         plt.plot(self.history['mse_validation'], linestyle="--")
-        plt.title('model error')
-        plt.ylabel('error')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'validation'], loc='upper right')
+        plt.title('Model MSE')
+        plt.ylabel('Mean squared error')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Validation'], loc='upper right', fontsize=fontsize_legend_axis)
+        plt.xticks(fontsize=fontsize_legend_axis)
+        plt.yticks(fontsize=fontsize_legend_axis)
+        plt.grid()
         plt.show()
 
         plt.plot(self.history['acc_train'])
         plt.plot(self.history['acc_validation'], linestyle="--")
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'validation'], loc='lower right')
+        plt.title('Model ACC')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Validation'], loc='lower right', fontsize=fontsize_legend_axis)
+        plt.xticks(fontsize=fontsize_legend_axis)
+        plt.yticks(fontsize=fontsize_legend_axis)
+        plt.grid()
         plt.show()
 
 
