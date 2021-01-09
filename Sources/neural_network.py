@@ -101,7 +101,7 @@ class NeuralNetwork:
                                 X_validation, labels_validation)
 
         elif self.solver == "extreme_adam":
-            print("Running adam")
+            print("Running extreme adam")
             self.history = extreme_adam(X, labels, self, hyperparameters, epochs, batch_size, shuffle,
                                         X_validation, labels_validation)
 

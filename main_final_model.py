@@ -6,9 +6,9 @@ from Sources.tools.useful import k_fold
 import numpy as np
 
 if __name__ == "__main__":
-
+    seed = 3
     # load dataset
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
     # if is classification
     X_train = one_hot(X_train)
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     accuracy_validation = []
     for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
         # build and train the network
-        nn = NeuralNetwork({'seed': np.random.randint(100),
+        nn = NeuralNetwork({'seed': seed,
                             'layers': [
                                 {"neurons": len(x_t[0]), "activation": "linear"},
                                 {"neurons": 5, "activation": "tanh"},
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
         nn.fit(X=x_t, labels=y_t,
                X_validation=x_v, labels_validation=y_v,
-               hyperparameters={"lambda": 0.000,
+               hyperparameters={"lambda": 0.008,
                                 "stepsize": 0.9,
                                 "momentum": 0.2,
                                 "epsilon": 0.0001
@@ -46,8 +46,8 @@ if __name__ == "__main__":
                epochs=500, batch_size=32, shuffle=True)
 
         # to visualize plot for each configuration test
-        nn.plot_graph()
-        input()
+        # nn.plot_graph()
+        # input()
 
         # store results
         mse_train.append(nn.history["mse_train"][-1])
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     accuracy_test = []
     for t in range(trials):
         # build and train the network
-        nn = NeuralNetwork({'seed': np.random.randint(100),
+        nn = NeuralNetwork({'seed': seed,
                             'layers': [
                                 {"neurons": len(X_train[0]), "activation": "linear"},
                                 {"neurons": 5, "activation": "tanh"},

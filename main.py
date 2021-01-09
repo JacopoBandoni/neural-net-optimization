@@ -9,23 +9,23 @@ from Sources.tools.useful import k_fold, grid_search
 
 if __name__ == "__main__":
     grid_parameters = {"lambda": [0.0001, 0.002],
-                       "stepsize": [0.7, 0.9],
-                       "momentum": [0.7, 0.9],
+                       "stepsize": [0.3, 0.8],
+                       # "momentum": [0.2, 0.7],
                        "epsilon": [0.0009],
-                       "batch_size": [64], # mini-batch vs online
+                       "batch_size": [32], # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [3],
+                       "layer_number": [1],
                        # for each layer the element to test
-                       "neuron": [3],
-                       "activation": ["tanh"],
-                       "activation_output": ["tanh"],
-                       "initialization": ["uniform"]
+                       "neuron": [50, 100, 150],
+                       "activation": ["tanh", "sigmoid"],
+                       "activation_output": ["linear"],
+                       "initialization": ["uniform", "xavier"]
                        }
 
     epochs = 600
 
     # load dataset
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(2)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
     # if is classification
     X_train = one_hot(X_train)
 
@@ -56,9 +56,9 @@ if __name__ == "__main__":
                     topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
             # build and train the network
-            nn = NeuralNetwork({'seed': np.random.randint(100),
+            nn = NeuralNetwork({'seed': 0,
                                 'layers': topology,
-                                'solver': 'sgd',
+                                'solver': 'extreme_adam',
                                 "problem": "classification",
                                 "initialization": config["initialization"]
                                 })
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                    X_validation=x_v, labels_validation=y_v,
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
-                                    "momentum": config["momentum"],
+                                    # "momentum": config["momentum"],
                                     "epsilon": config["epsilon"]},
                    epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
