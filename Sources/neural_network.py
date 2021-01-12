@@ -177,17 +177,17 @@ class NeuralNetwork:
         plt.yticks(fontsize=fontsize_legend_axis)
         plt.grid()
         plt.show()
-
-        plt.plot(self.history['acc_train'])
-        plt.plot(self.history['acc_validation'], linestyle="--")
-        plt.title('Model ACC')
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Validation'], loc='lower right', fontsize=fontsize_legend_axis)
-        plt.xticks(fontsize=fontsize_legend_axis)
-        plt.yticks(fontsize=fontsize_legend_axis)
-        plt.grid()
-        plt.show()
+        if self.problem != "regression":
+            plt.plot(self.history['acc_train'])
+            plt.plot(self.history['acc_validation'], linestyle="--")
+            plt.title('Model ACC')
+            plt.ylabel('Accuracy')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Validation'], loc='lower right', fontsize=fontsize_legend_axis)
+            plt.xticks(fontsize=fontsize_legend_axis)
+            plt.yticks(fontsize=fontsize_legend_axis)
+            plt.grid()
+            plt.show()
 
 
 # main used for test output
