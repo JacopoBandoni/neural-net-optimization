@@ -2,22 +2,22 @@ import csv
 import numpy as np
 
 from Sources.neural_network import NeuralNetwork
-from Sources.tools.load_dataset import load_monk
+from Sources.tools.load_dataset import load_monk, load_cup20
 from itertools import product
 from Sources.tools.preprocessing import one_hot
 from Sources.tools.useful import k_fold, grid_search
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0.0001, 0.002],
-                       "stepsize": [0.3, 0.8],
-                       # "momentum": [0.2, 0.7],
+    grid_parameters = {"lambda": [0.005],
+                       "stepsize": [0.01],
+                       "momentum": [0.1],
                        "epsilon": [0.0009],
                        "batch_size": [32], # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
                        "layer_number": [1],
                        # for each layer the element to test
-                       "neuron": [50, 100, 150],
-                       "activation": ["tanh", "sigmoid"],
+                       "neuron": [3],
+                       "activation": ["tanh"],
                        "activation_output": ["linear"],
                        "initialization": ["uniform", "xavier"]
                        }
@@ -25,9 +25,8 @@ if __name__ == "__main__":
     epochs = 600
 
     # load dataset
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
-    # if is classification
-    X_train = one_hot(X_train)
+    (X_train, y_train, names_train), (X_test, names_test) = load_cup20()
+    # if is classification X_train = one_hot(X_train)
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
@@ -50,40 +49,40 @@ if __name__ == "__main__":
             for dim in range(0, config["layer_number"]+2):
                 if dim == 0:    # first layer
                     topology.append({"neurons": len(x_t[0]), "activation": "linear"})
-                elif dim == config["layer_number"]+1:   # last layer
-                    topology.append({"neurons": 1, "activation": config["activation_output"]})
+                elif dim == config["layer_number"]+1:   # last layer (2 for cup)
+                    topology.append({"neurons": 2, "activation": config["activation_output"]})
                 else:   # hidden layers
                     topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
             # build and train the network
             nn = NeuralNetwork({'seed': 0,
                                 'layers': topology,
-                                'solver': 'extreme_adam',
-                                "problem": "classification",
+                                'solver': 'sgd',
+                                "problem": "regression",
                                 "initialization": config["initialization"]
                                 })
 
             # y must be a column vector, not row one
-            y_t = [[i] for i in y_t]
-            y_v = [[i] for i in y_v]
+            # classification y_t = [[i] for i in y_t]
+            # classification y_v = [[i] for i in y_v]
 
             nn.fit(X=x_t, labels=y_t,
                    X_validation=x_v, labels_validation=y_v,
                    hyperparameters={"lambda": config["lambda"],
                                     "stepsize": config["stepsize"],
-                                    # "momentum": config["momentum"],
+                                    "momentum": config["momentum"],
                                     "epsilon": config["epsilon"]},
                    epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
-            # nn.plot_graph()
-            # input()
+            nn.plot_graph()
+            input()
 
             # store results
             mse_train.append(nn.history["mse_train"][-1])
             mse_validation.append(nn.history["mse_validation"][-1])
-            accuracy_train.append(nn.history["acc_train"][-1])
-            accuracy_validation.append(nn.history["acc_validation"][-1])
+            # accuracy_train.append(nn.history["acc_train"][-1])
+            # accuracy_validation.append(nn.history["acc_validation"][-1])
 
         # over k fold compute mean
         experiment_data = {}
@@ -94,12 +93,12 @@ if __name__ == "__main__":
         experiment_data["mse_test"] = np.mean(mse_validation)
         experiment_data["mse_train_variance"] = np.var(mse_train)
         experiment_data["mse_test_variance"] = np.var(mse_validation)
-
+        """
         experiment_data["acc_train"] = np.mean(accuracy_train)
         experiment_data["acc_test"] = np.mean(accuracy_validation)
         experiment_data["acc_train_variance"] = np.var(accuracy_train)
         experiment_data["acc_validation_variance"] = np.var(accuracy_validation)
-
+        """
         results.append(experiment_data)
 
     # save results to csv file
