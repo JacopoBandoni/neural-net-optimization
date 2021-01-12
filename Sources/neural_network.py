@@ -49,13 +49,13 @@ class NeuralNetwork:
         else:
             raise Exception("Problem statement error")
 
-        if "initialization" in settings and settings["initialization"] == "uniform" or settings["initialization"] == "xavier":
+        if "initialization" in settings and settings["initialization"] == "uniform" or settings[
+            "initialization"] == "xavier":
             self.initialization = settings["initialization"]
         else:
             raise Exception("Initialization statemenet error")
 
         self.__initialize_weights()
-
 
     def __initialize_weights(self):
         self.weights = {}
@@ -151,7 +151,6 @@ class NeuralNetwork:
         """
 
         return mean_euclidean_error(self.predict(X), labels)
-
 
     def score_accuracy(self, X, labels):
         """
