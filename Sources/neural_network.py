@@ -142,6 +142,17 @@ class NeuralNetwork:
 
         return mean_squared_error(self.predict(X), labels)
 
+    def score_mee(self, X, labels):
+        """
+        Compute mse of the network given inputs data
+        :param X: test data where is computed output
+        :param labels: target output where is computed scored function
+        :return: mean square error over the test set
+        """
+
+        return mean_euclidean_error(self.predict(X), labels)
+
+
     def score_accuracy(self, X, labels):
         """
         COmpute accuracy of the model given inputs data
@@ -167,10 +178,14 @@ class NeuralNetwork:
     def plot_graph(self):
         # "Loss"
         fontsize_legend_axis = 12
-        plt.plot(self.history['mse_train'])
-        plt.plot(self.history['mse_validation'], linestyle="--")
-        plt.title('Model MSE')
-        plt.ylabel('Mean squared error')
+        plt.plot(self.history['error_train'])
+        plt.plot(self.history['error_validation'], linestyle="--")
+        if self.problem == "classification":
+            plt.title('Model MSE')
+            plt.ylabel('Mean squared error')
+        else:
+            plt.title('Model MEE')
+            plt.ylabel('Mean Euclidean Error')
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Validation'], loc='upper right', fontsize=fontsize_legend_axis)
         plt.xticks(fontsize=fontsize_legend_axis)

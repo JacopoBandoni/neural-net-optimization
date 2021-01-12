@@ -2,7 +2,6 @@ import numpy as np
 
 from Sources.solver.iter_utility import __forward_pass, __backward_pass
 from Sources.tools.activation_function import *
-from Sources.tools.score_function import mean_squared_loss, mean_squared_error, classification_accuracy
 from Sources.tools.useful import batch, unison_shuffle
 
 
@@ -28,10 +27,11 @@ def sgd(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: in
     deltab_old = {}
     # needed to plot graph
     history = {}
+    error_train = []
+    error_validation = []
     accuracy_train = []
     accuracy_validation = []
-    mse_train = []
-    mse_validation = []
+
     for i in range(0, max_epochs):
 
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
@@ -56,18 +56,20 @@ def sgd(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: in
             deltaW_old = deltaW
             deltab_old = deltab
 
-        # save mse
-        mse_train.append(model.score_mse(X, labels))
-        mse_validation.append(model.score_mse(X_validation, labels_validation))
-
-        # save accuracy
+        # save mse or mee
         if model.problem == "classification":
+            error_train.append(model.score_mse(X, labels))
+            error_validation.append(model.score_mse(X_validation, labels_validation))
             accuracy_train.append(model.score_accuracy(X, labels))
             accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
-        # how to plot accuracy on regression?
+        elif model.problem == "regression":
+            error_train.append(model.score_mee(X, labels))
+            error_validation.append(model.score_mee(X_validation, labels_validation))
+        else:
+            raise Exception("Wrong problem statemenet (regression or classification)")
 
-        if mse_validation[i] <= hyperparameters["epsilon"]:
-            print("Stopping condition raggiunta, errore = " + str(mse_validation[i]))
+        if error_validation[i] <= hyperparameters["epsilon"]:
+            print("Stopping condition raggiunta, errore = " + str(error_validation[i]))
             break
 
         if shuffle:
@@ -75,8 +77,8 @@ def sgd(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: in
 
         # print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
 
-    history["mse_train"] = mse_train
-    history["mse_validation"] = mse_validation
+    history["error_train"] = error_train
+    history["error_validation"] = error_validation
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
 
