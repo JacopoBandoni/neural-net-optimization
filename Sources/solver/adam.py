@@ -29,8 +29,8 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
     history = {}
     accuracy_train = []
     accuracy_validation = []
-    mse_train = []
-    mse_validation = []
+    error_train = []
+    error_validation = []
 
     # momentum variables
     momentum_1_w = {}
@@ -100,25 +100,29 @@ def adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: i
                                                 (np.sqrt(momentum_2_b_cap["b" + str(j)]) + epsilon_adam))  # - \
                 # hyperparameters["lambda"] * weights["b" + str(j)]
 
-        # save mse
-        mse_train.append(model.score_mse(X, labels))
-        mse_validation.append(model.score_mse(X_validation, labels_validation))
-
-        # save accuracy
+        # save mse or mee
         if model.problem == "classification":
+            error_train.append(model.score_mse(X, labels))
+            error_validation.append(model.score_mse(X_validation, labels_validation))
             accuracy_train.append(model.score_accuracy(X, labels))
             accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
-            # how to plot accuracy on regression?
+        elif model.problem == "regression":
+            error_train.append(model.score_mee(X, labels))
+            error_validation.append(model.score_mee(X_validation, labels_validation))
+        else:
+            raise Exception("Wrong problem statemenet (regression or classification)")
 
-        if mse_validation[i] <= hyperparameters["epsilon"]:
-            print("Stopping condition raggiunta: errore = " + str(mse_train[i]))
+        if error_validation[i] <= hyperparameters["epsilon"]:
+            print("Stopping condition raggiunta, errore = " + str(error_validation[i]))
             break
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
-    history["mse_train"] = mse_train
-    history["mse_validation"] = mse_validation
+        # print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
+
+    history["error_train"] = error_train
+    history["error_validation"] = error_validation
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
 
