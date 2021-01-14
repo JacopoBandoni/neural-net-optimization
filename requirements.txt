@@ -2,3 +2,4 @@
 numpy==1.19.3       # this specific version is neeeded to solve an error in last windows version
 SciPy==1.5.4
 matplotlib
+joblib
