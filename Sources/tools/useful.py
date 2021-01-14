@@ -83,6 +83,20 @@ def grid_search(hyperparameters:dict):
     return configurations
 
 
+def hold_out(X, labels, percentage):
+    X, labels = unison_shuffle(X, labels)
+
+    portion = int((percentage*len(X))/100)
+
+    X_train = X[:-portion]
+    Y_train = labels[:-portion]
+    X_test = X[-portion:]
+    Y_test = labels[-portion:]
+
+    return X_train, Y_train, X_test, Y_test
+
+
+
 # main used for test output
 if __name__ == "__main__":
     print("Useful function tests")

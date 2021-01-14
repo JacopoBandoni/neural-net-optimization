@@ -5,28 +5,31 @@ from Sources.neural_network import NeuralNetwork
 from Sources.tools.load_dataset import load_monk, load_cup20
 from itertools import product
 from Sources.tools.preprocessing import one_hot
-from Sources.tools.useful import k_fold, grid_search
+from Sources.tools.useful import k_fold, grid_search, hold_out
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0.005],
-                       "stepsize": [0.01],
-                       "momentum": [0.1],
+    grid_parameters = {"lambda": [0.00, 0.00005],
+                       "stepsize": [0.00001, 0.0001],
+                       "momentum": [0.0, 0.2],
                        "epsilon": [0.0009],
-                       "batch_size": [32], # mini-batch vs online
+                       "batch_size": [32, 128], # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [1],
+                       "layer_number": [1, 5],
                        # for each layer the element to test
-                       "neuron": [3],
-                       "activation": ["tanh"],
+                       "neuron": [30],
+                       "activation": ["tanh", "sigmoid"],
                        "activation_output": ["linear"],
                        "initialization": ["uniform", "xavier"]
                        }
 
-    epochs = 600
+    epochs = 1000
 
-    # load dataset
+        # load dataset
     (X_train, y_train, names_train), (X_test, names_test) = load_cup20()
     # if is classification X_train = one_hot(X_train)
+
+    # TODO sul cup FARE HOLDOUT per avere un TS interno, necessario per i plots (keep percentage as original split)
+    X_train, y_train, X_test, y_test = hold_out(X_train, y_train, percentage=25)
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
@@ -75,12 +78,12 @@ if __name__ == "__main__":
                    epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
-            nn.plot_graph()
-            input()
+            # nn.plot_graph()
+            # input()
 
             # store results
-            mse_train.append(nn.history["mse_train"][-1])
-            mse_validation.append(nn.history["mse_validation"][-1])
+            mse_train.append(nn.history["error_train"][-1])
+            mse_validation.append(nn.history["error_validation"][-1])
             # accuracy_train.append(nn.history["acc_train"][-1])
             # accuracy_validation.append(nn.history["acc_validation"][-1])
 
@@ -89,10 +92,10 @@ if __name__ == "__main__":
         for name in config:
             experiment_data[name] = config[name]
         # compute mean over fold
-        experiment_data["mse_train"] = np.mean(mse_train)
-        experiment_data["mse_test"] = np.mean(mse_validation)
-        experiment_data["mse_train_variance"] = np.var(mse_train)
-        experiment_data["mse_test_variance"] = np.var(mse_validation)
+        experiment_data["error_train"] = np.mean(mse_train)
+        experiment_data["error_test"] = np.mean(mse_validation)
+        experiment_data["error_train_variance"] = np.var(mse_train)
+        experiment_data["error_test_variance"] = np.var(mse_validation)
         """
         experiment_data["acc_train"] = np.mean(accuracy_train)
         experiment_data["acc_test"] = np.mean(accuracy_validation)
