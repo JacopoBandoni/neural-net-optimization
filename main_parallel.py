@@ -32,7 +32,7 @@ def grid_test(config, X_train, y_train):
         # build and train the network
         nn = NeuralNetwork({'seed': 0,
                             'layers': topology,
-                            'solver': 'sgd',
+                            'solver': 'extreme_adam',
                             "problem": "regression",
                             "initialization": config["initialization"]
                             })
@@ -48,6 +48,9 @@ def grid_test(config, X_train, y_train):
                                 "momentum": config["momentum"],
                                 "epsilon": config["epsilon"]},
                epochs=epochs, batch_size=config["batch_size"], shuffle=True)
+
+        # nn.plot_graph()
+        # input()
 
         # store results
         error_train.append(nn.history["error_train"][-1])
@@ -66,15 +69,15 @@ def grid_test(config, X_train, y_train):
 
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0.0],#[0.00, 0.00005],
-                       "stepsize": [0.001], #[0.0001, 0.001],
-                       "momentum": [0.0], #[0.0, 0.2],
+    grid_parameters = {"lambda": [0.00, 0.0005],
+                       "stepsize": [0.001, 0.01, 0.07],
+                        "momentum": [0.0],
                        "epsilon": [0.0009],
-                       "batch_size": [32],# [32, 128],  # mini-batch vs online
+                       "batch_size": [64, 128],  # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [1, 5],
+                       "layer_number": [1],
                        # for each layer the element to test
-                       "neuron": [30],
+                       "neuron": [30, 80, 200],
                        "activation": ["tanh", "sigmoid"],
                        "activation_output": ["linear"],
                        "initialization": ["uniform", "xavier"]
@@ -90,6 +93,7 @@ if __name__ == "__main__":
 
     configurations = grid_search(grid_parameters)
     print("Number of configurations", len(configurations))
+
     results = Parallel(n_jobs=6, verbose=10)(delayed(grid_test)(config, X_train, y_train) for config in configurations)
 
     # save results to csv file
