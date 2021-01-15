@@ -9,6 +9,21 @@ from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
 
 
+def __solve_lower_system(L, b):
+    """
+    Solve lower triangular system
+    :param L:
+    :param b:
+    :return:
+    """
+    x = np.zeros_like(b, dtype=float)
+    x[0][0] = (b[0][0] / L[0][0])
+    for i in range(1, len(L)):
+        x[i][0] = (b[i][0] - L[i] @ x) / float(L[i][i])
+
+    return x
+
+
 def __cholesky_decomposition(A):
     """
     Performs a Cholesky decomposition of A
@@ -34,6 +49,7 @@ def __cholesky_decomposition(A):
 
     return L
 
+
 def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
     """
     :param regularization: il termine di regolarizzazione
@@ -47,7 +63,7 @@ def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
     H = np.array(X)
 
     # the cicle it's to begin the implementation of ELM with multiple ramdom layer
-    for i in range(1, len(layers)-1):
+    for i in range(1, len(layers) - 1):
         if i != len(layers):
             H = (H @ weights['W' + str(i)]) + weights['b' + str(i)]
 
@@ -57,15 +73,15 @@ def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
             H = tanh(H)
 
     # andrebbe aggiunto len(x) secondo il report
-    A = H.T @ H + np.identity(layers[-2]["neurons"], float)*regularization
+    A = H.T @ H + np.identity(layers[-2]["neurons"], float) * regularization
     B = H.T @ T
 
     C = __cholesky_decomposition(A)
 
-    W2p = solve_triangular(C, B, lower=True)
+    W2p = __solve_lower_system(C, B)    # TODO here B is a MATRIX, fix code
     W2 = solve_triangular(C.T, W2p, lower=False)
 
-    weights["W" + str(len(layers) -1)] = W2
+    weights["W" + str(len(layers) - 1)] = W2
 
     """"
     TO VISUALIZE STABILITY ISSUE
@@ -91,10 +107,12 @@ if __name__ == "__main__":
     print("Extreme learning tests: cholesky")
 
     A = [[30, -3, 50],
-        [1, 40, 16],
-        [30, -5, -50],
-        [23, 40, 7]]
+         [1, 40, 16],
+         [30, -5, -50],
+         [23, 40, 7]]
+    A = np.array(A)
 
-    b = [[4], [5], [-1], [6]]
+    b = [[4], [5], [-1]]
 
-    cholesky_scratch(A, b, )
+    L = __cholesky_decomposition(A.T @ A)
+    print(__solve_lower_system(L, b))
