@@ -89,3 +89,12 @@ def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
 
 if __name__ == "__main__":
     print("Extreme learning tests: cholesky")
+
+    A = [[30, -3, 50],
+        [1, 40, 16],
+        [30, -5, -50],
+        [23, 40, 7]]
+
+    b = [[4], [5], [-1], [6]]
+
+    cholesky_scratch(A, b, )

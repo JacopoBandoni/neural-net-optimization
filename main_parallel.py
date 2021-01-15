@@ -32,7 +32,7 @@ def grid_test(config, X_train, y_train):
         # build and train the network
         nn = NeuralNetwork({'seed': 0,
                             'layers': topology,
-                            'solver': 'sgd',
+                            'solver': 'extreme_adam',
                             "problem": "regression",
                             "initialization": config["initialization"]
                             })
@@ -69,18 +69,18 @@ def grid_test(config, X_train, y_train):
 
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0.0],
-                       "stepsize": [0.06, 0.08],
+    grid_parameters = {"lambda": [0.0005, 0.005],
+                       "stepsize": [0.001, 0.02],
                         "momentum": [0.0],
                        "epsilon": [0.0009],
                        "batch_size": [32, 64],  # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [3, 6],
+                       "layer_number": [1],
                        # for each layer the element to test
-                       "neuron": [20, 40],
-                       "activation": ["sigmoid"],
+                       "neuron": [150, 300],
+                       "activation": ["tanh", "sigmoid"],
                        "activation_output": ["linear"],
-                       "initialization": ["xavier"]
+                       "initialization": ["uniform"]
                        }
 
     epochs = 2000
