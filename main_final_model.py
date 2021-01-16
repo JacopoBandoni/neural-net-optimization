@@ -6,11 +6,11 @@ from Sources.tools.useful import k_fold
 import numpy as np
 
 if __name__ == "__main__":
-    seed = 3
+    seed = 5
     # load dataset
     (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
     # if is classification
-    X_train = one_hot(X_train)
+    # X_train = one_hot(X_train)
 
     # produce set mutually exclusive
     X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=10)
@@ -22,32 +22,33 @@ if __name__ == "__main__":
     accuracy_validation = []
     for (x_t, y_t, x_v, y_v) in zip(X_T, Y_T, X_V, Y_V):
         # build and train the network
-        nn = NeuralNetwork({'seed': seed,
+        nn = NeuralNetwork({'seed': 0,
                             'layers': [
                                 {"neurons": len(x_t[0]), "activation": "linear"},
-                                {"neurons": 5, "activation": "tanh"},
-                                {"neurons": 1, "activation": "tanh"}
+                                {"neurons": 100, "activation": "tanh"},
+                                {"neurons": 1, "activation": "linear"}
                             ],
-                            'solver': 'sgd',
+                            'solver': 'extreme_adam',
                             "problem": "classification",
-                            "initialization": "uniform"
+                            "initialization": "uniform" # test xavier
                             })
         # y must be a column vector, not row one
+
         y_t = [[i] for i in y_t]
         y_v = [[i] for i in y_v]
 
         nn.fit(X=x_t, labels=y_t,
                X_validation=x_v, labels_validation=y_v,
-               hyperparameters={"lambda": 0.008,
-                                "stepsize": 0.9,
-                                "momentum": 0.2,
+               hyperparameters={"lambda": 0.005,
+                                "stepsize": 0.0009,
+                                #"momentum": 0.2,
                                 "epsilon": 0.0001
                                 },
-               epochs=500, batch_size=32, shuffle=True)
+               epochs=1000, batch_size=32, shuffle=True)
 
         # to visualize plot for each configuration test
-        # nn.plot_graph()
-        # input()
+        nn.plot_graph()
+        input()
 
         # store results
         mse_train.append(nn.history["mse_train"][-1])
@@ -73,8 +74,8 @@ if __name__ == "__main__":
     # y must be a column vector, not row one
     y_train = [[i] for i in y_train]
     y_test = [[i] for i in y_test]
-    # TODO convert test to one hot ?
-    X_test = one_hot(X_test)
+
+    # X_test = one_hot(X_test)
 
     mse_train = []
     mse_test = []
@@ -85,22 +86,22 @@ if __name__ == "__main__":
         nn = NeuralNetwork({'seed': seed,
                             'layers': [
                                 {"neurons": len(X_train[0]), "activation": "linear"},
-                                {"neurons": 5, "activation": "tanh"},
-                                {"neurons": 1, "activation": "tanh"}
+                                {"neurons": 100, "activation": "tanh"},
+                                {"neurons": 1, "activation": "linear"}
                             ],
-                            'solver': 'sgd',
+                            'solver': 'extreme_adam',
                             "problem": "classification",
                             "initialization": "uniform"
                             })
 
         nn.fit(X=X_train, labels=y_train,
                X_validation=X_test, labels_validation=y_test,
-               hyperparameters={"lambda": 0.000,
-                                "stepsize": 0.9,
-                                "momentum": 0.2,
+               hyperparameters={"lambda": 0.005,
+                                "stepsize": 0.0009,
+                                # "momentum": 0.2,
                                 "epsilon": 0.0001
                                 },
-               epochs=500, batch_size=32, shuffle=True)
+               epochs=1000, batch_size=32, shuffle=True)
 
         # store results
         mse_train.append(nn.history["mse_train"][-1])

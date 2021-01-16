@@ -9,7 +9,7 @@ from Sources.tools.useful import k_fold, grid_search, hold_out
 
 if __name__ == "__main__":
     grid_parameters = {"lambda": [0.00, 0.00005],
-                       "stepsize": [0.00001, 0.0001],
+                       "stepsize": [0.0001, 0.001],
                        "momentum": [0.0, 0.2],
                        "epsilon": [0.0009],
                        "batch_size": [32, 128], # mini-batch vs online
@@ -22,7 +22,7 @@ if __name__ == "__main__":
                        "initialization": ["uniform", "xavier"]
                        }
 
-    epochs = 1000
+    epochs = 2000
 
         # load dataset
     (X_train, y_train, names_train), (X_test, names_test) = load_cup20()
@@ -30,12 +30,15 @@ if __name__ == "__main__":
 
     # TODO sul cup FARE HOLDOUT per avere un TS interno, necessario per i plots (keep percentage as original split)
     X_train, y_train, X_test, y_test = hold_out(X_train, y_train, percentage=25)
+    print("New Training data:", len(X_train), ", New test data:", len(X_test))
 
     # load configurations to test
     configurations = grid_search(grid_parameters)
+
     # for each configuration produced by grid search build and train model over k fold
     results = []
     for count, config in enumerate(configurations):
+        
         print("Testing configuration", count, "(", len(configurations), "):", config)
         # produce set mutually exclusive
         X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=3)
@@ -78,8 +81,8 @@ if __name__ == "__main__":
                    epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
             # to visualize plot for each configuration test
-            # nn.plot_graph()
-            # input()
+            nn.plot_graph()
+            input()
 
             # store results
             mse_train.append(nn.history["error_train"][-1])
