@@ -16,7 +16,7 @@ def __solve_upper_system(L, b):
     x[-1] = (b[-1][0] / L[-1][-1])
     for i in reversed(range(0, len(L)-1)):
         x[i] = (b[i] - L[i][i:] @ x[i:]) / float(L[i][i])
-    return x
+    return np.array(x)
 
 def __solve_lower_system(L, b):
     """
@@ -29,7 +29,8 @@ def __solve_lower_system(L, b):
     x[0] = (b[0][0] / L[0][0])
     for i in range(1, len(L)):
         x[i] = (b[i] - L[i][:i] @ x[:i]) / float(L[i][i])
-    return x
+
+    return np.array(x)
 
 
 def __cholesky_decomposition(A):
@@ -55,7 +56,7 @@ def __cholesky_decomposition(A):
                 # LaTeX: l_{ik} = \frac{1}{l_{kk}} \left( a_{ik} - \sum^{k-1}_{j=1} l_{ij} l_{kj} \right)
                 L[i][k] = (1.0 / L[k][k] * (A[i][k] - tmp_sum))
 
-    return L
+    return np.array(L)
 
 
 def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
@@ -86,8 +87,8 @@ def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
 
     C = __cholesky_decomposition(A)
 
-    W2p = __solve_lower_system(C, B)    # TODO here B is a MATRIX, fix code
-    W2 = __solve_upper_system(C.T, W2p) # todo here B is a matrix, fix Code
+    W2p = __solve_lower_system(C, B)
+    W2 = __solve_upper_system(C.T, W2p)
 
     weights["W" + str(len(layers) - 1)] = W2
 
