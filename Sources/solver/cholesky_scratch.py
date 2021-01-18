@@ -1,13 +1,23 @@
 import numpy as np
 import math
-from scipy.linalg import cho_factor
-from scipy.linalg import cho_solve
-from scipy.linalg import solve_triangular
 from scipy import stats
 
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
 
+def __solve_upper_system(L, b):
+    """
+    Solve lower triangular system
+    :param L:
+    :param b:
+    :return:
+    """
+    x = np.zeros_like(b, dtype=float)
+    x[-1][0] = (b[-1][0] / L[-1][0])
+    for i in reversed(range(0, len(L)-1)):
+        x[i][0] = (b[i][0] - L[i] @ x) / float(L[i][i])
+
+    return x
 
 def __solve_lower_system(L, b):
     """
@@ -17,10 +27,9 @@ def __solve_lower_system(L, b):
     :return:
     """
     x = np.zeros_like(b, dtype=float)
-    x[0][0] = (b[0][0] / L[0][0])
+    x[0] = (b[0][0] / L[0][0])
     for i in range(1, len(L)):
-        x[i][0] = (b[i][0] - L[i] @ x) / float(L[i][i])
-
+        x[i] = (b[i] - L[i][:i] @ x[:i]) / float(L[i][i])
     return x
 
 
@@ -62,7 +71,7 @@ def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
     T = labels
     H = np.array(X)
 
-    # the cicle it's to begin the implementation of ELM with multiple ramdom layer
+    # the cicle it's to begin the implementation of ELM with multiple random layer
     for i in range(1, len(layers) - 1):
         if i != len(layers):
             H = (H @ weights['W' + str(i)]) + weights['b' + str(i)]
@@ -79,7 +88,7 @@ def cholesky_scratch(X, labels, regularization, weights: dict, layers: dict):
     C = __cholesky_decomposition(A)
 
     W2p = __solve_lower_system(C, B)    # TODO here B is a MATRIX, fix code
-    W2 = solve_triangular(C.T, W2p, lower=False)
+    W2 = __solve_upper_system(C.T, W2p) # todo here B is a matrix, fix Code
 
     weights["W" + str(len(layers) - 1)] = W2
 
@@ -115,4 +124,7 @@ if __name__ == "__main__":
     b = [[4], [5], [-1]]
 
     L = __cholesky_decomposition(A.T @ A)
-    print(__solve_lower_system(L, b))
+    print(L)
+    B = __solve_lower_system(L, b)
+    print(B)
+    print(__solve_upper_system(np.array(L).transpose(), B))
