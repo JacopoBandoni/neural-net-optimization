@@ -7,21 +7,20 @@ from Sources.tools.score_function import *
 
 def __solve_upper_system(L, b):
     """
-    Solve lower triangular system
+    Solve upper triangular system with backward substitution
     :param L:
     :param b:
     :return:
     """
     x = np.zeros_like(b, dtype=float)
-    x[-1][0] = (b[-1][0] / L[-1][0])
+    x[-1] = (b[-1][0] / L[-1][-1])
     for i in reversed(range(0, len(L)-1)):
-        x[i][0] = (b[i][0] - L[i] @ x) / float(L[i][i])
-
+        x[i] = (b[i] - L[i][i:] @ x[i:]) / float(L[i][i])
     return x
 
 def __solve_lower_system(L, b):
     """
-    Solve lower triangular system
+    Solve lower triangular system with forward substitution
     :param L:
     :param b:
     :return:
