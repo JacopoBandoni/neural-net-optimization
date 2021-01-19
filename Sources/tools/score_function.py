@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.spatial import distance
 
 def mean_squared_error(output: list, target: list):
     """
@@ -52,7 +52,7 @@ def mean_euclidean_error(output: list, target: list):
 
     difference = np.subtract(output, target)
     square = np.square(difference)
-    squared = np.sqrt(square)
+    squared = np.sqrt(np.sum(square, axis=1))
     mee = squared.mean()
 
     return mee
@@ -62,3 +62,13 @@ def mean_euclidean_error(output: list, target: list):
 # main used for test output
 if __name__ == "__main__":
     print("Score function tests")
+    a = (1, 2, 3)
+    b = (4, 5, 6)
+    dst1 = distance.euclidean(a, b)
+    dst2 = distance.euclidean(a, b)
+    print((dst1+dst2)/2)
+
+    a = [[1, 2, 3], [1, 2, 3]]
+    b = [[4, 5, 6], [4, 5, 6]]
+    dst = mean_euclidean_error(a, b)
+    print(dst)
