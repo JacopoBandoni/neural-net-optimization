@@ -13,7 +13,7 @@ def to_parallelize(x_t, y_t, x_v, y_v):
     nn = NeuralNetwork({'seed': 0,
                         'layers': [
                             {"neurons": len(x_t[0]), "activation": "linear"},
-                            {"neurons": 600, "activation": "tanh"},
+                            {"neurons": 300, "activation": "tanh"},
                             {"neurons": 2, "activation": "linear"}
                         ],
                         'solver': 'extreme_adam',
@@ -22,9 +22,9 @@ def to_parallelize(x_t, y_t, x_v, y_v):
                         })
     nn.fit(X=x_t, labels=y_t,
            X_validation=x_v, labels_validation=y_v,
-           hyperparameters={"lambda": 0.00003,
-                            "stepsize": 0.001,
-                            #"momentum": 0.02,
+           hyperparameters={"lambda": 0.0005,
+                            "stepsize": 0.07,
+                            "momentum": "adaptive",
                             "epsilon": 0.0001
                             },
            epochs=10000, batch_size=128, shuffle=True)

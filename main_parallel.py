@@ -32,7 +32,7 @@ def grid_test(config, X_train, y_train):
         # build and train the network
         nn = NeuralNetwork({'seed': 3,
                             'layers': topology,
-                            'solver': 'extreme_adam',
+                            'solver': 'sgd',
                             "problem": "regression",
                             "initialization": config["initialization"]
                             })
@@ -69,27 +69,28 @@ def grid_test(config, X_train, y_train):
 
 
 if __name__ == "__main__":
-    grid_parameters = {"lambda": [0.000, 0.0005],
-                       "stepsize": [0.001, 0.01, 0.07],
-                        "momentum": ["adaptive"],
-                       "epsilon": [0.0009],
-                       "batch_size": [64, 128],  # mini-batch vs online
-                       # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [1],
-                       # for each layer the element to test
-                       "neuron": [50, 150, 300],
-                       "activation": ["tanh", "sigmoid"],
-                       "activation_output": ["linear"],
-                       "initialization": ["uniform", "xavier"]
-                       }
 
-    epochs = 1000
+    epochs = 5000
 
     # load data
     (X_train, y_train, names_train), (X_test, names_test) = load_cup20()
     # hold out
     X_train, y_train, X_test, y_test = hold_out(X_train, y_train, percentage=25)
     print("New Training data:", len(X_train), ", New test data:", len(X_test))
+
+    grid_parameters = {"lambda": [0.000],
+                       "stepsize": [0.009, 0.0009],
+                       "momentum": [0, 0.001],
+                       "epsilon": [0.0009],
+                       "batch_size": [32, 64],  # mini-batch vs online
+                       # insert number of HIDDEN layer where you will insert hyperparams
+                       "layer_number": [3, 5],
+                       # for each layer the element to test
+                       "neuron": [30, 50],
+                       "activation": ["tanh"],
+                       "activation_output": ["linear"],
+                       "initialization": ["xavier"]
+                       }
 
     configurations = grid_search(grid_parameters)
     print("Number of configurations", len(configurations))
