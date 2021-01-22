@@ -111,7 +111,8 @@ class NeuralNetwork:
             if self.layers[-1]["activation"] != "linear":
                 raise Exception("Per cholesky l'ultima funzione di attivazione deve mecessariamente essere lineare")
 
-            cholesky(X, labels, hyperparameters["lambda"], self.weights, self.layers)
+            self.history = cholesky(X, labels, self, hyperparameters["lambda"], self.weights, self.layers,
+                     X_validation, labels_validation)
 
         else:
             raise Exception("Wrong solver choice")

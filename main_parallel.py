@@ -29,11 +29,12 @@ def grid_test(config, X_train, y_train):
             else:  # hidden layers
                 topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
+        problem = "regression"
         # build and train the network
         nn = NeuralNetwork({'seed': 3,
                             'layers': topology,
-                            'solver': 'sgd',
-                            "problem": "regression",
+                            'solver': 'cholesky',
+                            "problem": problem,
                             "initialization": config["initialization"]
                             })
 
@@ -53,8 +54,12 @@ def grid_test(config, X_train, y_train):
         # input()
 
         # store results
-        error_train.append(nn.history["error_train"][-1])
-        error_validation.append(nn.history["error_validation"][-1])
+        if problem == "regression":
+            error_train = nn.history["error_train"]
+            error_validation = nn.history["error_validation"]
+        else:
+            error_train.append(nn.history["error_train"][-1])
+            error_validation.append(nn.history["error_validation"][-1])
 
     experiment_data = {}
     for name in config:
@@ -78,18 +83,18 @@ if __name__ == "__main__":
     X_train, y_train, X_test, y_test = hold_out(X_train, y_train, percentage=25)
     print("New Training data:", len(X_train), ", New test data:", len(X_test))
 
-    grid_parameters = {"lambda": [0.000],
-                       "stepsize": [0.009, 0.0009],
-                       "momentum": [0, 0.001],
+    grid_parameters = {"lambda": [0.0005, 0.005, 0.5],
+                       "stepsize": ["None"],
+                       "momentum": ["None"],
                        "epsilon": [0.0009],
-                       "batch_size": [32, 64],  # mini-batch vs online
+                       "batch_size": ["None"],  # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [3, 5],
+                       "layer_number": [1],
                        # for each layer the element to test
-                       "neuron": [30, 50],
-                       "activation": ["tanh"],
+                       "neuron": [100, 1000, 5000],
+                       "activation": ["tanh", "sigmoid"],
                        "activation_output": ["linear"],
-                       "initialization": ["xavier"]
+                       "initialization": ["uniform", "xavier"]
                        }
 
     configurations = grid_search(grid_parameters)

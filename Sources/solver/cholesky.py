@@ -8,7 +8,8 @@ from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
 
 
-def cholesky(X, labels, regularization, weights: dict, layers: dict):
+def cholesky(X, labels, model, regularization, weights: dict, layers: dict,
+             X_validation, labels_validation):
     """
     :param regularization: il termine di regolarizzazione
     :param X: Our whole training data
@@ -40,6 +41,19 @@ def cholesky(X, labels, regularization, weights: dict, layers: dict):
 
     weights["W" + str(len(layers) -1)] = W2
 
+    # save mse or mee
+    history = {}
+    if model.problem == "classification":
+        history["error_train"] = model.score_mse(X, labels)
+        history["error_validation"] = model.score_mse(X_validation, labels_validation)
+        history["acc_train"] = model.score_accuracy(X, labels)
+        history["acc_validation"] = model.score_accuracy(X_validation, labels_validation)
+    elif model.problem == "regression":
+        history["error_train"] = model.score_mee(X, labels)
+        history["error_validation"] = model.score_mee(X_validation, labels_validation)
+    else:
+        raise Exception("Wrong problem statemenet (regression or classification)")
+
     """"
     TO VISUALIZE STABILITY ISSUE
     print("Stampo ( C(C.T) )W2 - (H.T)T")
@@ -58,7 +72,7 @@ def cholesky(X, labels, regularization, weights: dict, layers: dict):
     print((H @ W2) - T)
     print()
     """
-
+    return history
 
 if __name__ == "__main__":
     print("Extreme learning tests: cholesky")
