@@ -29,12 +29,12 @@ def grid_test(config, X_train, y_train):
             else:  # hidden layers
                 topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
-        problem = "regression"
+        solver = "adam"
         # build and train the network
         nn = NeuralNetwork({'seed': 3,
                             'layers': topology,
-                            'solver': 'cholesky',
-                            "problem": problem,
+                            'solver': solver,
+                            "problem": "regression",
                             "initialization": config["initialization"]
                             })
 
@@ -54,7 +54,7 @@ def grid_test(config, X_train, y_train):
         # input()
 
         # store results
-        if problem == "regression":
+        if solver == "cholesky":
             error_train = nn.history["error_train"]
             error_validation = nn.history["error_validation"]
         else:
@@ -83,18 +83,18 @@ if __name__ == "__main__":
     X_train, y_train, X_test, y_test = hold_out(X_train, y_train, percentage=25)
     print("New Training data:", len(X_train), ", New test data:", len(X_test))
 
-    grid_parameters = {"lambda": [0.0005, 0.005, 0.5],
-                       "stepsize": ["None"],
-                       "momentum": ["None"],
+    grid_parameters = {"lambda":  [0.00005],
+                       "stepsize": [0.001, 0.0001],
+                       "momentum": [0],
                        "epsilon": [0.0009],
-                       "batch_size": ["None"],  # mini-batch vs online
+                       "batch_size": [32, 64],  # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [1],
+                       "layer_number": [3, 5],
                        # for each layer the element to test
-                       "neuron": [100, 1000, 5000],
-                       "activation": ["tanh", "sigmoid"],
+                       "neuron": [30, 50],
+                       "activation": ["sigmoid"],
                        "activation_output": ["linear"],
-                       "initialization": ["uniform", "xavier"]
+                       "initialization": ["uniform"]
                        }
 
     configurations = grid_search(grid_parameters)
