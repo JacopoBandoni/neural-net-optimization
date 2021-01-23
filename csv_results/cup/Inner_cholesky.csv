@@ -1,0 +1,5 @@
+lambda;stepsize;momentum;epsilon;batch_size;layer_number;neuron;activation;activation_output;initialization;error_train;error_test;error_train_variance;error_test_variance
+0,8;None;None;0,0009;None;1;6000;sigmoid;linear;uniform;3,543273688;4,448563607;0;0
+0,8;None;None;0,0009;None;1;2000;sigmoid;linear;uniform;3,788574079;4,492956034;0;0
+0,5;None;None;0,0009;None;1;6000;sigmoid;linear;uniform;3,31469319;4,542193459;0;0
+0,5;None;None;0,0009;None;1;2000;sigmoid;linear;uniform;3,613346922;4,571182953;0;0

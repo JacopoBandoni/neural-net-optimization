@@ -29,7 +29,7 @@ def grid_test(config, X_train, y_train):
             else:  # hidden layers
                 topology.append({"neurons": config["neuron"], "activation": config["activation"]})
 
-        solver = "adam"
+        solver = "cholesky"
         # build and train the network
         nn = NeuralNetwork({'seed': 3,
                             'layers': topology,
@@ -50,8 +50,8 @@ def grid_test(config, X_train, y_train):
                                 "epsilon": config["epsilon"]},
                epochs=epochs, batch_size=config["batch_size"], shuffle=True)
 
-        nn.plot_graph()
-        input()
+        # nn.plot_graph()
+        # input()
 
         # store results
         if solver == "cholesky":
@@ -83,15 +83,15 @@ if __name__ == "__main__":
     X_train, y_train, X_test, y_test = hold_out(X_train, y_train, percentage=25)
     print("New Training data:", len(X_train), ", New test data:", len(X_test))
 
-    grid_parameters = {"lambda":  [0.00005],
-                       "stepsize": [0.001],
-                       "momentum": [0],
+    grid_parameters = {"lambda":  [0.5, 0.8],
+                       "stepsize": ["None"],
+                       "momentum": ["None"],
                        "epsilon": [0.0009],
-                       "batch_size": [64],  # mini-batch vs online
+                       "batch_size": ["None"],  # mini-batch vs online
                        # insert number of HIDDEN layer where you will insert hyperparams
-                       "layer_number": [3],
+                       "layer_number": [1],
                        # for each layer the element to test
-                       "neuron": [50],
+                       "neuron": [2000, 6000],
                        "activation": ["sigmoid"],
                        "activation_output": ["linear"],
                        "initialization": ["uniform"]
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     configurations = grid_search(grid_parameters)
     print("Number of configurations", len(configurations))
 
-    results = Parallel(n_jobs=1, verbose=10)(delayed(grid_test)(config, X_train, y_train) for config in configurations)
+    results = Parallel(n_jobs=6, verbose=10)(delayed(grid_test)(config, X_train, y_train) for config in configurations)
 
     # save results to csv file
     csv_columns = results[0].keys()
