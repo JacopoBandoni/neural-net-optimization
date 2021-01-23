@@ -54,12 +54,8 @@ def grid_test(config, X_train, y_train):
         # input()
 
         # store results
-        if solver == "cholesky":
-            error_train = nn.history["error_train"]
-            error_validation = nn.history["error_validation"]
-        else:
-            error_train.append(nn.history["error_train"][-1])
-            error_validation.append(nn.history["error_validation"][-1])
+        error_train.append(nn.history["error_train"][-1])
+        error_validation.append(nn.history["error_validation"][-1])
 
     experiment_data = {}
     for name in config:

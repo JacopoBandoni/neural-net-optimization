@@ -44,13 +44,13 @@ def cholesky(X, labels, model, regularization, weights: dict, layers: dict,
     # save mse or mee
     history = {}
     if model.problem == "classification":
-        history["error_train"] = model.score_mse(X, labels)
-        history["error_validation"] = model.score_mse(X_validation, labels_validation)
-        history["acc_train"] = model.score_accuracy(X, labels)
-        history["acc_validation"] = model.score_accuracy(X_validation, labels_validation)
+        history["error_train"] = [model.score_mse(X, labels)]
+        history["error_validation"] = [model.score_mse(X_validation, labels_validation)]
+        history["acc_train"] = [model.score_accuracy(X, labels)]
+        history["acc_validation"] = [model.score_accuracy(X_validation, labels_validation)]
     elif model.problem == "regression":
-        history["error_train"] = model.score_mee(X, labels)
-        history["error_validation"] = model.score_mee(X_validation, labels_validation)
+        history["error_train"] = [model.score_mee(X, labels)]
+        history["error_validation"] = [model.score_mee(X_validation, labels_validation)]
     else:
         raise Exception("Wrong problem statemenet (regression or classification)")
 
