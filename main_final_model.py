@@ -1,3 +1,5 @@
+import csv
+
 from joblib import Parallel, delayed
 
 from Sources.neural_network import NeuralNetwork
@@ -26,14 +28,14 @@ def to_parallelize(x_t, y_t, x_v, y_v):
     nn.fit(X=x_t, labels=y_t,
            X_validation=x_v, labels_validation=y_v,
            hyperparameters={"lambda": 0.00005,
-                            "stepsize": 0.0009,
+                            "stepsize": 0.0008,
                             "momentum": "None",
                             "epsilon": 0.0009
                             },
-           epochs=5000, batch_size=64, shuffle=True)
+           epochs=3000, batch_size=64, shuffle=True)
     # to visualize plot for each configuration test
-    nn.plot_graph()
-    input()
+    # nn.plot_graph()
+    # input()
 
     errors = [nn.history["error_train"][-1], nn.history["error_validation"][-1]]
 
@@ -42,12 +44,14 @@ def to_parallelize(x_t, y_t, x_v, y_v):
 
 if __name__ == "__main__":
     seed = 3
+    """
     # load data
     (X_train, y_train, names_train), (X_test, names_test) = load_cup20()
     # hold out
     X_train, y_train, X_test_new, y_test_new = hold_out(X_train, y_train, percentage=25)
     print("New Training data:", len(X_train), ", New test data:", len(X_test_new))
 
+    
     # produce set mutually exclusive
     X_T, Y_T, X_V, Y_V = k_fold(X_train, y_train, fold_number=6)
 
@@ -58,9 +62,11 @@ if __name__ == "__main__":
     print("MEE TR variance:", np.var(errors[:][0]))
     print("MEE VL:", np.mean(errors[:][1]))
     print("MEE VL variance:", np.var(errors[:][1]))
-
+    
+    """
 
     # ---------------------------------------------------
+    """
     # Model Assesment
     print(" ----- MODEL ASSESMENT ----- ")
     input()
@@ -69,11 +75,13 @@ if __name__ == "__main__":
     mee_train = []
     mee_test = []
     for t in range(trials):
-        solver = 'extreme_adam'
+        solver = 'adam'
         nn = NeuralNetwork({'seed': 3,
                             'layers': [
                                 {"neurons": len(X_train[0]), "activation": "linear"},
-                                {"neurons": 800, "activation": "tanh"},
+                                {"neurons": 50, "activation": "sigmoid"},
+                                {"neurons": 50, "activation": "sigmoid"},
+                                {"neurons": 50, "activation": "sigmoid"},
                                 {"neurons": 2, "activation": "linear"}
                             ],
                             'solver': solver,
@@ -82,12 +90,12 @@ if __name__ == "__main__":
                             })
         nn.fit(X=X_train, labels=y_train,
                X_validation=X_test_new, labels_validation=y_test_new,
-               hyperparameters={"lambda": 0.0005,
-                                "stepsize": 0.0009,
+               hyperparameters={"lambda": 0.00005,
+                                "stepsize": 0.0008,
                                 "momentum": "None",
                                 "epsilon": 0.0009
                                 },
-               epochs=5000, batch_size=64, shuffle=True)
+               epochs=3000, batch_size=64, shuffle=True)
 
         # nn.plot_graph()
 
@@ -99,3 +107,45 @@ if __name__ == "__main__":
     print("MSE TR variance:", np.var(mee_train))
     print("MSE TS:", np.mean(mee_test))
     print("MSE TS variance:", np.var(mee_test))
+        
+    """
+    # -----------------------------------------------------------------------
+    # MODEL PREDICTION
+    # load data
+    (X_train, y_train, names_train), (X_test, names_test) = load_cup20()
+
+    solver = 'adam'
+    nn = NeuralNetwork({'seed': 3,
+                        'layers': [
+                            {"neurons": len(X_train[0]), "activation": "linear"},
+                            {"neurons": 50, "activation": "sigmoid"},
+                            {"neurons": 50, "activation": "sigmoid"},
+                            {"neurons": 50, "activation": "sigmoid"},
+                            {"neurons": 2, "activation": "linear"}
+                        ],
+                        'solver': solver,
+                        "problem": "regression",
+                        "initialization": "uniform"
+                        })
+    nn.fit(X=X_train, labels=y_train,
+           X_validation=None, labels_validation=None,
+           hyperparameters={"lambda": 0.00005,
+                            "stepsize": 0.0008,
+                            "momentum": "None",
+                            "epsilon": 0.0009
+                            },
+           epochs=3000, batch_size=64, shuffle=True)
+
+    print("MSE TR:", nn.history["error_train"][-1])
+
+    outputs = nn.predict(X_test)
+
+    filename = "output.csv"
+    try:
+        with open(filename, 'w') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+            for name, result in zip(names_test, outputs):
+                writer.writerow([name, result])
+            print("\nSaved file:", filename)
+    except IOError:
+        print("Csv writing error")
