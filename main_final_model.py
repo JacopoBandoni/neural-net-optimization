@@ -145,7 +145,7 @@ if __name__ == "__main__":
         with open(filename, 'w') as csvfile:
             writer = csv.writer(csvfile, delimiter=',')
             for name, result in zip(names_test, outputs):
-                writer.writerow([name, result])
+                writer.writerow([name, result[0], result[1]])
             print("\nSaved file:", filename)
     except IOError:
         print("Csv writing error")
