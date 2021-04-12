@@ -179,7 +179,8 @@ class NeuralNetwork:
         # "Loss"
         fontsize_legend_axis = 12
         plt.plot(self.history['error_train'])
-        plt.plot(self.history['error_validation'], linestyle="--")
+        if 'error_validation' in self.history:
+            plt.plot(self.history['error_validation'], linestyle="--")
         if self.problem == "classification":
             plt.title('Model MSE')
             plt.ylabel('Mean squared error')
@@ -194,7 +195,8 @@ class NeuralNetwork:
         plt.show()
         if self.problem != "regression":
             plt.plot(self.history['acc_train'])
-            plt.plot(self.history['acc_validation'], linestyle="--")
+            if 'error_validation' in self.history:
+                plt.plot(self.history['acc_validation'], linestyle="--")
             plt.title('Model ACC')
             plt.ylabel('Accuracy')
             plt.xlabel('Epoch')
