@@ -40,7 +40,8 @@ class NeuralNetwork:
                 (settings["solver"] == "sgd" or
                  settings["solver"] == "adam" or
                  settings["solver"] == "extreme_adam" or
-                 settings["solver"] == "cholesky"):
+                 settings["solver"] == "cholesky") or \
+                settings["solver"] == "cholesky_scratch":
             self.solver = settings["solver"]
         else:
             raise Exception("Activation function error")

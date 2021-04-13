@@ -129,6 +129,8 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
     print()
     """
 
+    return history
+
 
 if __name__ == "__main__":
     print("Extreme learning tests: cholesky")
