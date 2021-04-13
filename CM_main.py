@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # build and train the network
     nn = NeuralNetwork({'seed': 0,
                         'layers': layers,
-                        'solver': 'adam',
+                        'solver': 'cholesky',
                         "problem": "classification",
                         "initialization": "uniform"
                         })
@@ -34,7 +34,3 @@ if __name__ == "__main__":
                             "momentum": "None",
                             "epsilon": 0.005},
            epochs=1, batch_size=len(X_test), shuffle=False)
-
-
-    nn.plot_graph()
-    input()

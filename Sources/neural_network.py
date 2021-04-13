@@ -2,6 +2,7 @@ import numpy as np
 
 from Sources.solver.adam import adam
 from Sources.solver.cholesky import cholesky
+from Sources.solver.cholesky_scratch import cholesky_scratch
 from Sources.solver.extreme_adam import extreme_adam
 from Sources.solver.steepest_gradient_descent import sgd
 from Sources.tools.activation_function import *
@@ -112,6 +113,15 @@ class NeuralNetwork:
                 raise Exception("Per cholesky l'ultima funzione di attivazione deve mecessariamente essere lineare")
 
             self.history = cholesky(X, labels, self, hyperparameters["lambda"], self.weights, self.layers,
+                     X_validation, labels_validation)
+
+        elif self.solver == "cholesky_scratch":
+            print("Running cholesky scratch")
+
+            if self.layers[-1]["activation"] != "linear":
+                raise Exception("Per cholesky l'ultima funzione di attivazione deve mecessariamente essere lineare")
+
+            self.history = cholesky_scratch(X, labels, self, hyperparameters["lambda"], self.weights, self.layers,
                      X_validation, labels_validation)
 
         else:
