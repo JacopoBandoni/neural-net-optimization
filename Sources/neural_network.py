@@ -73,7 +73,7 @@ class NeuralNetwork:
                 self.weights['b' + str(i)] = np.zeros((1, self.layers[i]['neurons']))
 
     def fit(self, X, labels, X_validation, labels_validation, hyperparameters: dict, epochs=1, batch_size=32,
-            shuffle=True):
+            shuffle=False):
         """
         :param labels_validation:
         :param X_validation:

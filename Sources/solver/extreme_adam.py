@@ -97,19 +97,22 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         # save mse or mee
         if model.problem == "classification":
             error_train.append(model.score_mse(X, labels))
-            error_validation.append(model.score_mse(X_validation, labels_validation))
+            if X_validation is not None:
+                error_validation.append(model.score_mse(X_validation, labels_validation))
             accuracy_train.append(model.score_accuracy(X, labels))
-            accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
+            if X_validation is not None:
+                accuracy_validation.append(model.score_accuracy(X_validation, labels_validation))
         elif model.problem == "regression":
             error_train.append(model.score_mee(X, labels))
-            error_validation.append(model.score_mee(X_validation, labels_validation))
+            if X_validation is not None:
+                error_validation.append(model.score_mee(X_validation, labels_validation))
         else:
             raise Exception("Wrong problem statemenet (regression or classification)")
-
+        """
         if error_validation[i] <= hyperparameters["epsilon"]:
             print("Stopping condition raggiunta, errore = " + str(error_validation[i]))
             break
-
+        """
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
@@ -119,6 +122,8 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     history["error_validation"] = error_validation
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
+
+    print("Error: ", history["error_train"][-1])
 
     return history
 

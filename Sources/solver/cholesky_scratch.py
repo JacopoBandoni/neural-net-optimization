@@ -1,9 +1,12 @@
+import time
+
 import numpy as np
 import math
 from scipy import stats
-
+from numpy import linalg as LA
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
+import matplotlib.pyplot as plt
 
 def __solve_upper_system(L, b):
     """
@@ -12,6 +15,7 @@ def __solve_upper_system(L, b):
     :param b:
     :return:
     """
+
     x = np.zeros_like(b, dtype=float)
     x[-1] = (b[-1][0] / L[-1][-1])
     for i in reversed(range(0, len(L)-1)):
@@ -72,6 +76,8 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
     T = labels
     H = np.array(X)
 
+    tic = time.perf_counter()
+
     # the cicle it's to begin the implementation of ELM with multiple random layer
     for i in range(1, len(layers) - 1):
         if i != len(layers):
@@ -82,14 +88,20 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
         if layers[i]["activation"] == "tanh":
             H = tanh(H)
 
-    # andrebbe aggiunto len(x) secondo il report
-    A = H.T @ H + np.identity(layers[-2]["neurons"], float) * regularization
+    A = H.T @ H + len(X) * regularization * np.identity(layers[-2]["neurons"], float)
+
+    # numero condizionamento che da bound error, errore di peso deve essere minore di questo
     B = H.T @ T
 
     C = __cholesky_decomposition(A)
 
     W2p = __solve_lower_system(C, B)
     W2 = __solve_upper_system(C.T, W2p)
+
+    toc = time.perf_counter()
+
+    print("\n")
+    print(f"Seconds elapsed: {toc-tic:0.4f}")
 
     weights["W" + str(len(layers) - 1)] = W2
 
@@ -109,9 +121,28 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
     else:
         raise Exception("Wrong problem statemenet (regression or classification)")
 
+    print("Error: ", history["error_train"])
 
-    """"
-    TO VISUALIZE STABILITY ISSUE
+    # here A == H*H.t + n*lambda*I
+    print("Condition number of A:", LA.cond(A))
+    # here H == sigmoid(X*W1+bias)
+    u, s, vh = LA.svd(A)
+    print("Valori singolari di H: \n -> max: ", np.max(s), "\n -> min:", np.min(s))
+
+    print("Norm of W2:", LA.norm(W2))
+
+    fontsize_legend_axis = 14
+    plt.plot(s)
+    plt.title('Singolar value distribution')
+    plt.ylabel('Singolar value')
+    plt.yscale('log')
+    plt.xlabel('i-th')
+    plt.xticks(fontsize=fontsize_legend_axis)
+    plt.yticks(fontsize=fontsize_legend_axis)
+    plt.grid()
+    plt.show()
+    """
+    # TO VISUALIZE STABILITY ISSUE
     print("Stampo ( C(C.T) )W2 - (H.T)T")
     print(((C @ C.T) @ W2) - B)
     print()

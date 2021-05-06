@@ -1,8 +1,11 @@
+import time
+
 import numpy as np
 from scipy.linalg import cho_factor
 from scipy.linalg import cho_solve
 from scipy.linalg import solve_triangular
 from scipy import stats
+from numpy import linalg as LA
 
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
@@ -21,6 +24,8 @@ def cholesky(X, labels, model, regularization, weights: dict, layers: dict,
     T = labels
     H = np.array(X)
 
+    tic = time.perf_counter()
+
     # the cicle it's to begin the implementation of ELM with multiple ramdom layer
     for i in range(1, len(layers)-1):
         if i != len(layers):
@@ -32,12 +37,17 @@ def cholesky(X, labels, model, regularization, weights: dict, layers: dict,
             H = tanh(H)
 
     # andrebbe aggiunto len(x) secondo il report
-    A = H.T @ H + np.identity(layers[-2]["neurons"], float)*regularization
+    A = H.T @ H + len(X) * regularization * np.identity(layers[-2]["neurons"], float)
     B = H.T @ T
     C = np.linalg.cholesky(A)
 
     W2p = solve_triangular(C, B, lower=True)
     W2 = solve_triangular(C.T, W2p, lower=False)
+
+    toc = time.perf_counter()
+
+    print("\n")
+    print(f"Seconds elapsed: {toc - tic:0.4f}")
 
     weights["W" + str(len(layers) -1)] = W2
 
@@ -57,6 +67,11 @@ def cholesky(X, labels, model, regularization, weights: dict, layers: dict,
     else:
         raise Exception("Wrong problem statemenet (regression or classification)")
 
+    print("Error: ", history["error_train"])
+
+    print("Condition number of A:", LA.cond(A))
+    u, s, vh = LA.svd(H)
+    print("Valori singolari di H: \n -> max: ", np.max(s), "\n -> min:", np.min(s))
     """"
     TO VISUALIZE STABILITY ISSUE
     print("Stampo ( C(C.T) )W2 - (H.T)T")
