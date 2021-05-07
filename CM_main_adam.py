@@ -33,11 +33,11 @@ if __name__ == "__main__":
 
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
-           hyperparameters={"lambda": 0.9, # test also lambda in table
-                            "stepsize": 0.9,
+           hyperparameters={"lambda": 0.1, # test also lambda in table
+                            "stepsize": 0.01,
                             #"momentum": "None",
                             #"epsilon": 0.000
                             },
-           epochs=200, batch_size=len(X_test[1]), shuffle=False)
+           epochs=200, batch_size=len(X_test), shuffle=False)
 
     # nn.plot_graph()

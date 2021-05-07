@@ -1,9 +1,11 @@
 import numpy as np
+import time
 
 from Sources.solver.iter_utility import __forward_pass, __backward_pass, __backward_pass_extreme
 from Sources.tools.score_function import mean_squared_error
 from Sources.tools.useful import batch, unison_shuffle
-
+import matplotlib.pyplot as plt
+from numpy import linalg as LA
 
 def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch_size: int, shuffle: bool,
                  X_validation, labels_validation):
@@ -28,6 +30,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     accuracy_validation = []
     error_train = []
     error_validation = []
+    norm_of_gradients = []
 
     errors = []
 
@@ -48,6 +51,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     momentum_1_b_cap = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
     momentum_2_b_cap = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
 
+    tic = time.perf_counter()
     for i in range(0, max_epochs):
 
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
@@ -94,6 +98,10 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
                                                     (np.sqrt(momentum_2_b_cap) + epsilon_adam)) #- \
                                                   # hyperparameters["lambda"] * weights["b" + str(len(layers) - 1)]
 
+            # save norm of the gradient for each iteration
+            norm_grad = LA.norm(np.array(deltaW).flatten())
+            norm_of_gradients.append(norm_grad)
+
         # save mse or mee
         if model.problem == "classification":
             error_train.append(model.score_mse(X, labels))
@@ -118,12 +126,41 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
 
         # print("\nEpoch number " + str(i) + "\n->Error:", mse_train[i])
 
+    toc = time.perf_counter()
+    print("\n")
+    print(f"Seconds elapsed: {toc - tic:0.4f}")
+
     history["error_train"] = error_train
     history["error_validation"] = error_validation
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
 
-    print("Error: ", history["error_train"][-1])
+    print()
+    print("Final Error: ", history["error_train"][-1])
+    print("-> best error:", np.min(history["error_train"]), "at iteration:", np.argmin(history["error_train"]))
+
+    print("Final norm of gradient:", norm_of_gradients[-1])
+
+    fontsize_legend_axis = 14
+    plt.plot(history["error_train"])
+    plt.title('Error by iteration')
+    plt.ylabel('Error value')
+    plt.xlabel('iteration')
+    plt.xticks(fontsize=fontsize_legend_axis)
+    plt.yticks(fontsize=fontsize_legend_axis)
+    plt.grid()
+    plt.show()
+
+    fontsize_legend_axis = 14
+    plt.plot(norm_of_gradients)
+    plt.title('Norm of gradients')
+    plt.ylabel('Norm')
+    plt.xlabel('iteration')
+    plt.xticks(fontsize=fontsize_legend_axis)
+    plt.yticks(fontsize=fontsize_legend_axis)
+    plt.grid()
+    plt.show()
+
 
     return history
 
