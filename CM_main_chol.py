@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
-           hyperparameters={"lambda": 0.0000001, # test also lambda in table
+           hyperparameters={"lambda": 0.0, # test also lambda in table
                             #"stepsize": 0.001,
                             #"momentum": "None",
                             #"epsilon": 0.0005

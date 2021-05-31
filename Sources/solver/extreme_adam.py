@@ -54,6 +54,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     tic = time.perf_counter()
     for i in range(0, max_epochs):
 
+        batch_norms = []
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
             # forward propagatiom
@@ -98,9 +99,11 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
                                                     (np.sqrt(momentum_2_b_cap) + epsilon_adam)) #- \
                                                   # hyperparameters["lambda"] * weights["b" + str(len(layers) - 1)]
 
-            # save norm of the gradient for each iteration
+            # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
-            norm_of_gradients.append(norm_grad)
+            batch_norms.append(norm_grad)
+
+        norm_of_gradients.append(np.mean(batch_norms))
 
         # save mse or mee
         if model.problem == "classification":
@@ -116,11 +119,12 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
                 error_validation.append(model.score_mee(X_validation, labels_validation))
         else:
             raise Exception("Wrong problem statemenet (regression or classification)")
-        """
-        if error_validation[i] <= hyperparameters["epsilon"]:
-            print("Stopping condition raggiunta, errore = " + str(error_validation[i]))
+
+        if error_train[i] <= hyperparameters["epsilon"]:
+            print("Stopping condition reached at iteration", i)
             break
-        """
+        else:
+            print("iteration", i)
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
@@ -140,6 +144,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     print("-> best error:", np.min(history["error_train"]), "at iteration:", np.argmin(history["error_train"]))
 
     print("Final norm of gradient:", norm_of_gradients[-1])
+    print("-> norm at best error:", norm_of_gradients[np.argmin(history["error_train"])])
 
     fontsize_legend_axis = 14
     plt.plot(history["error_train"])
@@ -155,6 +160,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     plt.plot(norm_of_gradients)
     plt.title('Norm of gradients')
     plt.ylabel('Norm')
+    plt.yscale('log')
     plt.xlabel('iteration')
     plt.xticks(fontsize=fontsize_legend_axis)
     plt.yticks(fontsize=fontsize_legend_axis)

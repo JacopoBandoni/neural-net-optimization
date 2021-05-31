@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # ADAM meglio batch e non batch
 
     # build and train the network
-    nn = NeuralNetwork({'seed': 0,
+    nn = NeuralNetwork({'seed': 3,
                         'layers': layers,
                         'solver': 'extreme_adam',
                         "problem": "classification",
@@ -33,11 +33,11 @@ if __name__ == "__main__":
 
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
-           hyperparameters={"lambda": 0.1, # test also lambda in table
-                            "stepsize": 0.01,
+           hyperparameters={"lambda": 0.0000001, # test also lambda in table
+                            "stepsize": 0.9,
                             #"momentum": "None",
-                            #"epsilon": 0.000
+                            "epsilon": 0.0001
                             },
-           epochs=200, batch_size=len(X_test), shuffle=False)
+           epochs=3000, batch_size=432, shuffle=False)
 
     # nn.plot_graph()

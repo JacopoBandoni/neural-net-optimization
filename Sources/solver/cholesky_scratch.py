@@ -131,6 +131,8 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
 
     print("Norm of W2:", LA.norm(W2))
 
+    ## FARE PLOT
+
     fontsize_legend_axis = 14
     plt.plot(s)
     plt.title('Singolar value distribution')
