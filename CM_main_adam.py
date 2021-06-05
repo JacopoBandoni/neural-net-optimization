@@ -18,13 +18,13 @@ if __name__ == "__main__":
 
     # adam last lineare (hidden a scelta)
     layers = [{"neurons": len(X_test[1]), "activation": "linear"},
-              {"neurons": 200, "activation": "tanh"},
+              {"neurons": 1000, "activation": "tanh"},
               {"neurons": 1, "activation": "linear"}]
 
     # ADAM meglio batch e non batch
 
     # build and train the network
-    nn = NeuralNetwork({'seed': 3,
+    nn = NeuralNetwork({'seed': 0,
                         'layers': layers,
                         'solver': 'extreme_adam',
                         "problem": "classification",
@@ -33,11 +33,11 @@ if __name__ == "__main__":
 
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
-           hyperparameters={"lambda": 0.0000001, # test also lambda in table
+           hyperparameters={"lambda": 0.9, # test also lambda in table
                             "stepsize": 0.9,
                             #"momentum": "None",
-                            "epsilon": 0.0001
+                            "epsilon": 0.019 # here we pass the best bound from chol
                             },
-           epochs=3000, batch_size=432, shuffle=False)
+           epochs=10000, batch_size=len(X_test), shuffle=False)
 
     # nn.plot_graph()

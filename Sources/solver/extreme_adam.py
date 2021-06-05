@@ -80,24 +80,16 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             momentum_1_b_cap = momentum_1_b / (1 - (beta_1 ** (i + 1)))
             momentum_2_b_cap = momentum_2_b / (1 - (beta_2 ** (i + 1)))
 
-            """
-            print("momentum 1 w cap =\n" + str(momentum_1_w_cap))
-            print("momentum 2 w cap =\n" + str(momentum_2_w_cap))
-                        """
-            #print("formula adam senza reg =\n" + str(((hyperparameters["stepsize"] * momentum_1_w_cap) /
-                                                      # (np.sqrt(momentum_2_w_cap) + epsilon_adam))))
-
             # update weight values
-            model.weights["W" + str(len(model.layers) - 1)] += ((hyperparameters["stepsize"] * momentum_1_w_cap) /
+            model.weights["W2"] += ((hyperparameters["stepsize"] * momentum_1_w_cap) /
                                                     (np.sqrt(momentum_2_w_cap) + epsilon_adam)) - \
-                                                   hyperparameters["lambda"] * model.weights["W" + str(len(model.layers) - 1)]
+                                                   hyperparameters["lambda"] * model.weights["W2"]
 
             # print("pesi aggiornati =\n" + str(weights["W" + str(len(layers) - 1)]))
 
             # update bias
-            model.weights["b" + str(len(model.layers) - 1)] += ((hyperparameters["stepsize"] * momentum_1_b_cap) /
-                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam)) #- \
-                                                  # hyperparameters["lambda"] * weights["b" + str(len(layers) - 1)]
+            model.weights["b2"] += ((hyperparameters["stepsize"] * momentum_1_b_cap) /
+                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam))
 
             # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
@@ -120,11 +112,16 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         else:
             raise Exception("Wrong problem statemenet (regression or classification)")
 
-        if error_train[i] <= hyperparameters["epsilon"]:
+        loss = error_train[-1] + hyperparameters["lambda"] * LA.norm(model.weights["W2"])
+        if loss <= hyperparameters["epsilon"]:
             print("Stopping condition reached at iteration", i)
+            print("Iteration:", i, "Loss:",
+                  "{:.1e}".format(loss))
             break
         else:
-            print("iteration", i)
+            print("Iteration:", i, "Loss:",
+                  "{:.1e}".format(loss))
+
         if shuffle:
             X, labels = unison_shuffle(X, labels)
 
@@ -139,12 +136,8 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
 
-    print()
-    print("Final Error: ", history["error_train"][-1])
-    print("-> best error:", np.min(history["error_train"]), "at iteration:", np.argmin(history["error_train"]))
-
     print("Final norm of gradient:", norm_of_gradients[-1])
-    print("-> norm at best error:", norm_of_gradients[np.argmin(history["error_train"])])
+    print("-> norm at best error:", "{:.1e}".format(norm_of_gradients[np.argmin(history["error_train"])]))
 
     fontsize_legend_axis = 14
     plt.plot(history["error_train"])
