@@ -2,11 +2,13 @@ import time
 
 import numpy as np
 import math
+import numpy
 from scipy import stats
 from numpy import linalg as LA
 from Sources.tools.activation_function import *
 from Sources.tools.score_function import *
 import matplotlib.pyplot as plt
+
 
 def __solve_upper_system(L, b):
     """
@@ -15,12 +17,12 @@ def __solve_upper_system(L, b):
     :param b:
     :return:
     """
-
     x = np.zeros_like(b, dtype=float)
     x[-1] = (b[-1][0] / L[-1][-1])
-    for i in reversed(range(0, len(L)-1)):
+    for i in reversed(range(0, len(L) - 1)):
         x[i] = (b[i] - L[i][i:] @ x[i:]) / float(L[i][i])
     return np.array(x)
+
 
 def __solve_lower_system(L, b):
     """
@@ -52,19 +54,16 @@ def __cholesky_decomposition(A):
     for i in range(n):
         for k in range(i + 1):
             tmp_sum = sum(L[i][j] * L[k][j] for j in range(k))
-
             if (i == k):  # Diagonal elements
-                # LaTeX: l_{kk} = \sqrt{ a_{kk} - \sum^{k-1}_{j=1} l^2_{kj}}
                 L[i][k] = math.sqrt(A[i][i] - tmp_sum)
             else:
-                # LaTeX: l_{ik} = \frac{1}{l_{kk}} \left( a_{ik} - \sum^{k-1}_{j=1} l_{ij} l_{kj} \right)
                 L[i][k] = (1.0 / L[k][k] * (A[i][k] - tmp_sum))
 
     return np.array(L)
 
 
 def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: dict,
-             X_validation, labels_validation):
+                     X_validation, labels_validation):
     """
     :param regularization: il termine di regolarizzazione
     :param X: Our whole training data
@@ -101,7 +100,7 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
     toc = time.perf_counter()
 
     print("\n")
-    print(f"Seconds elapsed: {toc-tic:0.4f}")
+    print(f"Seconds elapsed: {toc - tic:0.4f}")
 
     weights["W" + str(len(layers) - 1)] = W2
 
@@ -121,28 +120,39 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
     else:
         raise Exception("Wrong problem statemenet (regression or classification)")
 
-    print("Error: ", history["error_train"])
+    print("Error: ", "{:.1e}".format(history["error_train"][0]))
+    print("Loss: ", "{:.1e}".format(history["error_train"][0] + regularization * LA.norm(W2)))
 
     # here A == H*H.t + n*lambda*I
-    print("Condition number of A:", LA.cond(A))
+    print("Condition number of A:", "{:.1e}".format(LA.cond(A)))
     # here H == sigmoid(X*W1+bias)
-    u, s, vh = LA.svd(A)
-    print("Valori singolari di H: \n -> max: ", np.max(s), "\n -> min:", np.min(s))
+    eigenvalues = numpy.linalg.eigvals(A)
+    print("Autovalori di A: \n -> max: ", "{:.1e}".format(np.max(eigenvalues)), "\n -> min:",
+          "{:.1e}".format(np.min(eigenvalues)))
 
-    print("Norm of W2:", LA.norm(W2))
+    u, s, v = numpy.linalg.svd(H)
+    print("Valori singolari di H: \n -> max: ", "{:.1e}".format(np.max(s)), "\n -> min:", "{:.1e}".format(np.min(s)))
+
+    residual_numerator = LA.norm((C @ C.T) @ W2 - H.T @ labels)
+    residual_denominator = LA.norm((C @ C.T) @ W2)
+    print("Residual:", "{:.1e}".format(residual_numerator / residual_denominator))
 
     ## FARE PLOT
 
+    eigenvalues.sort()
+    eigenvalues = eigenvalues[::-1]
+
     fontsize_legend_axis = 14
-    plt.plot(s)
-    plt.title('Singolar value distribution')
-    plt.ylabel('Singolar value')
+    plt.plot(eigenvalues)
+    plt.title('Eigenvalues distribution')
+    plt.ylabel('Value')
     plt.yscale('log')
     plt.xlabel('i-th')
     plt.xticks(fontsize=fontsize_legend_axis)
     plt.yticks(fontsize=fontsize_legend_axis)
     plt.grid()
     plt.show()
+
     """
     # TO VISUALIZE STABILITY ISSUE
     print("Stampo ( C(C.T) )W2 - (H.T)T")

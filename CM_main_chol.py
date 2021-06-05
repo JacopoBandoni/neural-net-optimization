@@ -34,11 +34,11 @@ if __name__ == "__main__":
 
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
-           hyperparameters={"lambda": 0.0, # test also lambda in table
+           hyperparameters={"lambda": 0.0000009, # test also lambda in table
                             #"stepsize": 0.001,
                             #"momentum": "None",
                             #"epsilon": 0.0005
                             },
-           epochs=1, batch_size=len(X_test[1]), shuffle=False)
+           epochs=1, batch_size=len(X_test), shuffle=False)
 
     # nn.plot_graph()
