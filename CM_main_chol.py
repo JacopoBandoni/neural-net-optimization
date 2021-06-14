@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # cholesky last lineare (hidden a scelta) -> numero condizionamento
     # adam last lineare (hidden a scelta)
     layers = [{"neurons": len(X_test[1]), "activation": "linear"},
-              {"neurons": 1000, "activation": "tanh"},
+              {"neurons": 100, "activation": "tanh"},
               {"neurons": 1, "activation": "linear"}]
 
     # ADAM meglio batch e non batch
@@ -27,14 +27,14 @@ if __name__ == "__main__":
     # build and train the network
     nn = NeuralNetwork({'seed': 0,
                         'layers': layers,
-                        'solver': 'cholesky_scratch',
+                        'solver': 'cholesky',
                         "problem": "classification",
                         "initialization": "uniform"
                         })
 
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
-           hyperparameters={"lambda": 0.0000009, # test also lambda in table
+           hyperparameters={"lambda": 0.9, # test also lambda in table
                             #"stepsize": 0.001,
                             #"momentum": "None",
                             #"epsilon": 0.0005

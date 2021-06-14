@@ -34,10 +34,11 @@ if __name__ == "__main__":
     nn.fit(X=X_test, labels=y_test,
            X_validation=None, labels_validation=None,
            hyperparameters={"lambda": 0.9, # test also lambda in table
-                            "stepsize": 0.9,
+                            "stepsize": 0.009,
                             #"momentum": "None",
-                            "epsilon": 0.019 # here we pass the best bound from chol
+                            "epsilon": 0.000 # here we pass the best bound from chol
                             },
-           epochs=10000, batch_size=len(X_test), shuffle=False)
+           epochs=10, batch_size=16, shuffle=False)
+
 
     # nn.plot_graph()

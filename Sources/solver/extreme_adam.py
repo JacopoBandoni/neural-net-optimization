@@ -31,6 +31,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     error_train = []
     error_validation = []
     norm_of_gradients = []
+    losses = []
 
     errors = []
 
@@ -52,9 +53,12 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     momentum_2_b_cap = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
 
     tic = time.perf_counter()
+    iteration_reached = max_epochs
     for i in range(0, max_epochs):
 
         batch_norms = []
+        batch_rates = []
+        loss = []
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
             # forward propagatiom
@@ -94,8 +98,11 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
             batch_norms.append(norm_grad)
+            # save losses by mean in batch
+            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * LA.norm(model.weights["W2"]))
 
         norm_of_gradients.append(np.mean(batch_norms))
+        losses.append(np.mean(loss))
 
         # save mse or mee
         if model.problem == "classification":
@@ -112,15 +119,15 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         else:
             raise Exception("Wrong problem statemenet (regression or classification)")
 
-        loss = error_train[-1] + hyperparameters["lambda"] * LA.norm(model.weights["W2"])
-        if loss <= hyperparameters["epsilon"]:
+        if losses[-1] <= hyperparameters["epsilon"]:
             print("Stopping condition reached at iteration", i)
             print("Iteration:", i, "Loss:",
-                  "{:.1e}".format(loss))
+                  "{:.1e}".format(losses[-1]), "norm:", "{:.1e}".format(norm_of_gradients[-1]))
+            iteration_reached = i
             break
         else:
             print("Iteration:", i, "Loss:",
-                  "{:.1e}".format(loss))
+                  "{:.1e}".format(losses[-1]), "norm:", "{:.1e}".format(norm_of_gradients[-1]))
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
@@ -136,18 +143,30 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     history["acc_train"] = accuracy_train
     history["acc_validation"] = accuracy_validation
 
-    print("Final norm of gradient:", norm_of_gradients[-1])
-    print("-> norm at best error:", "{:.1e}".format(norm_of_gradients[np.argmin(history["error_train"])]))
+    print("Final norm of gradient:", "{:.1e}".format(norm_of_gradients[-1]))
+
+    # Convergence rate
+    convergence_rate = []
+    for i in range(0, iteration_reached):
+        numerator = losses[i] - hyperparameters["epsilon"]
+        denominator = hyperparameters["epsilon"]
+        convergence_rate.append(numerator/denominator)
 
     fontsize_legend_axis = 14
-    plt.plot(history["error_train"])
-    plt.title('Error by iteration')
-    plt.ylabel('Error value')
+    plt.plot(convergence_rate, 'r-')
+    plt.title('')
+    plt.ylabel('error')
+    plt.yscale('log')
     plt.xlabel('iteration')
     plt.xticks(fontsize=fontsize_legend_axis)
     plt.yticks(fontsize=fontsize_legend_axis)
     plt.grid()
     plt.show()
+
+    text_file = open("Output.txt", "w")
+    for element in convergence_rate:
+        text_file.write(str(element) + ",")
+    text_file.close()
 
     fontsize_legend_axis = 14
     plt.plot(norm_of_gradients)
