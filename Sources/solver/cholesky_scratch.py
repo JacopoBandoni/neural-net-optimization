@@ -120,8 +120,8 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
     else:
         raise Exception("Wrong problem statemenet (regression or classification)")
 
-    print("Error: ", "{:.1e}".format(history["error_train"][0]))
-    print("Loss: ", "{:.1e}".format(history["error_train"][0] + regularization * LA.norm(W2)))
+    print("Error: ", "{:.1e}".format(history["error_train"][-1]))
+    print("Loss: ", "{:.1e}".format(history["error_train"][-1] + regularization * LA.norm(W2)**2))
 
     # here A == H*H.t + n*lambda*I
     print("Condition number of A:", "{:.1e}".format(LA.cond(A)))

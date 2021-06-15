@@ -44,13 +44,9 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     # inizialization momentum variables
     momentum_1_w = np.zeros(model.weights["W" + str(len(model.layers) - 1)].shape)
     momentum_2_w = np.zeros(model.weights["W" + str(len(model.layers) - 1)].shape)
-    momentum_1_w_cap = np.zeros(model.weights["W" + str(len(model.layers) - 1)].shape)
-    momentum_2_w_cap = np.zeros(model.weights["W" + str(len(model.layers) - 1)].shape)
 
     momentum_1_b = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
     momentum_2_b = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
-    momentum_1_b_cap = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
-    momentum_2_b_cap = np.zeros(model.weights["b" + str(len(model.layers) - 1)].shape)
 
     tic = time.perf_counter()
     iteration_reached = max_epochs
@@ -70,13 +66,11 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             # print("calcolo deltaW dalla forward =\n" + str(momentum_1_w_cap))
 
             # update moment estimates
-            momentum_1_w = ((1 - beta_1) * deltaW) + (beta_1 * momentum_1_w)
-            momentum_2_w = ((1 - beta_2) * (deltaW ** 2)) + (beta_2 * momentum_2_w)
-            momentum_1_b = ((1 - beta_1) * deltab) + (beta_1 * momentum_1_b)
-            momentum_2_b = ((1 - beta_2) * (deltab ** 2)) + (beta_2 * momentum_2_b)
+            momentum_1_w = (beta_1 * momentum_1_w) + ((1 - beta_1) * deltaW)
+            momentum_2_w = (beta_2 * momentum_2_w) + ((1 - beta_2) * (deltaW ** 2))
+            momentum_1_b = (beta_1 * momentum_1_b) + ((1 - beta_1) * deltab)
+            momentum_2_b = (beta_2 * momentum_2_b) + ((1 - beta_2) * (deltab ** 2))
 
-            #print("momentum 1 w =\n" + str(momentum_1_w_cap))
-            #print("momentum 2 w =\n" + str(momentum_2_w_cap))
 
             # compute bias correction
             momentum_1_w_cap = momentum_1_w / (1 - (beta_1 ** (i + 1)))
@@ -85,21 +79,21 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             momentum_2_b_cap = momentum_2_b / (1 - (beta_2 ** (i + 1)))
 
             # update weight values
-            model.weights["W2"] += ((hyperparameters["stepsize"] * momentum_1_w_cap) /
+            model.weights["W2"] += hyperparameters["stepsize"] * ((momentum_1_w_cap) /
                                                     (np.sqrt(momentum_2_w_cap) + epsilon_adam)) - \
                                                    2 * hyperparameters["lambda"] * model.weights["W2"]
 
             # print("pesi aggiornati =\n" + str(weights["W" + str(len(layers) - 1)]))
 
             # update bias
-            model.weights["b2"] += ((hyperparameters["stepsize"] * momentum_1_b_cap) /
+            model.weights["b2"] += hyperparameters["stepsize"] * ((momentum_1_b_cap) /
                                                     (np.sqrt(momentum_2_b_cap) + epsilon_adam))
 
             # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
             batch_norms.append(norm_grad)
             # save losses by mean in batch
-            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * LA.norm(model.weights["W2"]))
+            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * (LA.norm(model.weights["W2"])**2))
 
         norm_of_gradients.append(np.mean(batch_norms))
         losses.append(np.mean(loss))
