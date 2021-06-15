@@ -87,7 +87,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             # update weight values
             model.weights["W2"] += ((hyperparameters["stepsize"] * momentum_1_w_cap) /
                                                     (np.sqrt(momentum_2_w_cap) + epsilon_adam)) - \
-                                                   hyperparameters["lambda"] * model.weights["W2"]
+                                                   2 * hyperparameters["lambda"] * model.weights["W2"]
 
             # print("pesi aggiornati =\n" + str(weights["W" + str(len(layers) - 1)]))
 

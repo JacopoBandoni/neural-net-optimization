@@ -8,8 +8,6 @@ if __name__ == "__main__":
 
     (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
 
-    X_test, y_test = unison_shuffle(X_test, y_test)
-
     X_test = one_hot(X_test)
     y_test = [[i] for i in y_test]
 
