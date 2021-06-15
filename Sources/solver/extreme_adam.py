@@ -37,7 +37,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
 
     beta_1 = 0.9
     beta_2 = 0.999
-    epsilon_adam = 1e-8
+    epsilon_adam = 1e-9
 
     num_batch = 0
 
@@ -53,7 +53,6 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     for i in range(0, max_epochs):
 
         batch_norms = []
-        batch_rates = []
         loss = []
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
 
@@ -79,15 +78,15 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             momentum_2_b_cap = momentum_2_b / (1 - (beta_2 ** (i + 1)))
 
             # update weight values
-            model.weights["W2"] += hyperparameters["stepsize"] * ((momentum_1_w_cap) /
+            model.weights["W2"] += hyperparameters["stepsize"] * (((momentum_1_w_cap) /
                                                     (np.sqrt(momentum_2_w_cap) + epsilon_adam)) - \
-                                                   2 * hyperparameters["lambda"] * model.weights["W2"]
+                                                                  (2 * hyperparameters["lambda"] * model.weights["W2"]))
 
             # print("pesi aggiornati =\n" + str(weights["W" + str(len(layers) - 1)]))
 
             # update bias
-            model.weights["b2"] += hyperparameters["stepsize"] * ((momentum_1_b_cap) /
-                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam))
+            model.weights["b2"] += hyperparameters["stepsize"] * (((momentum_1_b_cap) /
+                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam)))
 
             # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
@@ -116,12 +115,12 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         if losses[-1] <= hyperparameters["epsilon"]:
             print("Stopping condition reached at iteration", i)
             print("Iteration:", i, "Loss:",
-                  "{:.1e}".format(losses[-1]), "norm:", "{:.1e}".format(norm_of_gradients[-1]))
+                  "{:.2e}".format(losses[-1]), "norm:", "{:.1e}".format(norm_of_gradients[-1]))
             iteration_reached = i
             break
         else:
             print("Iteration:", i, "Loss:",
-                  "{:.1e}".format(losses[-1]), "norm:", "{:.1e}".format(norm_of_gradients[-1]))
+                  "{:.2e}".format(losses[-1]), "norm:", "{:.1e}".format(norm_of_gradients[-1]))
 
         if shuffle:
             X, labels = unison_shuffle(X, labels)
