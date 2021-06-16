@@ -55,7 +55,6 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         batch_norms = []
         loss = []
         for Xi, Yi in batch(X, labels, batch_size):  # get batch of x and y
-
             # forward propagatiom
             output, forward_cache = __forward_pass(Xi, model.weights, model.layers, True)
 
@@ -78,9 +77,10 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             momentum_2_b_cap = momentum_2_b / (1 - (beta_2 ** (i + 1)))
 
             # update weight values
-            model.weights["W2"] += hyperparameters["stepsize"] * (((momentum_1_w_cap) /
+            model.weights["W2"] += hyperparameters["stepsize"] * ((momentum_1_w_cap) /
                                                     (np.sqrt(momentum_2_w_cap) + epsilon_adam)) - \
-                                                                  (2 * hyperparameters["lambda"] * model.weights["W2"]))
+                                                                  hyperparameters["stepsize"] * (
+                                               2 * hyperparameters["lambda"] * model.weights["W2"])
 
             # print("pesi aggiornati =\n" + str(weights["W" + str(len(layers) - 1)]))
 
@@ -92,7 +92,8 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
             batch_norms.append(norm_grad)
             # save losses by mean in batch
-            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * (LA.norm(model.weights["W2"])**2))
+            score = LA.norm(np.array(model.weights["W2"]).flatten())
+            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * score ** 2)
 
         norm_of_gradients.append(np.mean(batch_norms))
         losses.append(np.mean(loss))

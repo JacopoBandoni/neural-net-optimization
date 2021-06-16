@@ -6,7 +6,7 @@ import time
 
 if __name__ == "__main__":
 
-    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(3)
+    (X_train, y_train, names_train), (X_test, y_test, names_test) = load_monk(1)
 
     X_test = one_hot(X_test)
     y_test = [[i] for i in y_test]
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # cholesky last lineare (hidden a scelta) -> numero condizionamento
     # adam last lineare (hidden a scelta)
     layers = [{"neurons": len(X_test[1]), "activation": "linear"},
-              {"neurons": 1000, "activation": "tanh"},
+              {"neurons": 200, "activation": "tanh"},
               {"neurons": 1, "activation": "linear"}]
 
     # ADAM meglio batch e non batch

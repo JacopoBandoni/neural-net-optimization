@@ -108,19 +108,17 @@ def __backward_pass_extreme(output, labels, forward_cache: dict, layers):
 
     # compute the vector of deltaW for each neuron in output
     for i in range(0, layers[len(layers) - 1]["neurons"]):
-
         # compute (yi - oi) for each pattern
-        delta_i = labels[:, [i]] - forward_cache["output" + str(len(layers) - 1)][:, [i]]
+        delta_i = labels[:, [i]] - forward_cache["output2"][:, [i]]
 
         # compute delta_i = (yi - oi)f'(neti) for each pattern
         delta_i = delta_i.T * apply_d_activation(layers[len(layers)-1]["activation"],
-                                                 forward_cache['net' + str(len(layers)-1)][:, [i]].T)
+                                                 forward_cache['net2'][:, [i]].T)
 
         # compute delta b for the i-th neuron in output
         deltab.append(delta_i.T.mean(axis=0).tolist())
-
         # compute oj(yi - oi)f'(neti) for each pattern and do the mean on all the pattern
-        deltaW.append((np.array(forward_cache['output' + str(len(layers) - 2)]) * delta_i.T)
+        deltaW.append((np.array(forward_cache['output1']) * delta_i.T)
                       .mean(axis=0).tolist())
 
     deltaW = np.array(deltaW).T
