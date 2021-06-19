@@ -31,13 +31,14 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
     error_train = []
     error_validation = []
     norm_of_gradients = []
+    variances = []
     losses = []
 
     errors = []
 
     beta_1 = 0.9
     beta_2 = 0.999
-    epsilon_adam = 1e-9
+    epsilon_adam = 1e-8
 
     num_batch = 0
 
@@ -77,25 +78,26 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             momentum_2_b_cap = momentum_2_b / (1 - (beta_2 ** (i + 1)))
 
             # update weight values
-            model.weights["W2"] += hyperparameters["stepsize"] * ((momentum_1_w_cap) /
-                                                    (np.sqrt(momentum_2_w_cap) + epsilon_adam)) - \
-                                                                  hyperparameters["stepsize"] * (
-                                               2 * hyperparameters["lambda"] * model.weights["W2"])
+            update = momentum_1_w_cap / (np.sqrt(momentum_2_w_cap) + epsilon_adam)
+            if hyperparameters["lambda"] > 0:
+                update -= 2 * hyperparameters["lambda"] * model.weights["W2"]
+            model.weights["W2"] += hyperparameters["stepsize"] * update
 
-            # print("pesi aggiornati =\n" + str(weights["W" + str(len(layers) - 1)]))
-
+            update_b = momentum_1_b_cap / (np.sqrt(momentum_2_b_cap) + epsilon_adam)
+            if hyperparameters["lambda"] > 0:
+                update_b -= 2 * hyperparameters["lambda"] * model.weights["b2"]
             # update bias
-            model.weights["b2"] += hyperparameters["stepsize"] * (((momentum_1_b_cap) /
-                                                    (np.sqrt(momentum_2_b_cap) + epsilon_adam)))
+            model.weights["b2"] += hyperparameters["stepsize"] * update_b
 
             # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
             batch_norms.append(norm_grad)
             # save losses by mean in batch
-            score = LA.norm(np.array(model.weights["W2"]).flatten())
-            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * score ** 2)
+            score = LA.norm(np.array(model.weights["W2"]).flatten())**2
+            loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * score)
 
         norm_of_gradients.append(np.mean(batch_norms))
+        variances.append(np.var(batch_norms))
         losses.append(np.mean(loss))
 
         # save mse or mee
@@ -159,6 +161,16 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
 
     text_file = open("Output.txt", "w")
     for element in convergence_rate:
+        text_file.write(str(element) + ",")
+    text_file.close()
+
+    text_file = open("Variance.txt", "w")
+    for element in variances:
+        text_file.write(str(element) + ",")
+    text_file.close()
+
+    text_file = open("norms.txt", "w")
+    for element in norm_of_gradients:
         text_file.write(str(element) + ",")
     text_file.close()
 

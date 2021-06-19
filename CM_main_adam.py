@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # adam last lineare (hidden a scelta)
     layers = [{"neurons": len(X_test[1]), "activation": "linear"},
-              {"neurons": 200, "activation": "tanh"},
+              {"neurons": 1000, "activation": "tanh"},
               {"neurons": 1, "activation": "linear"}]
 
     # build and train the network
@@ -32,9 +32,9 @@ if __name__ == "__main__":
            hyperparameters={"lambda": 0.0000009, # test also lambda in table
                             "stepsize": 0.009,
                             #"momentum": "None",
-                            "epsilon": 0.019 # here we pass the best bound from chol
+                            "epsilon": 0.0 # here we pass the best bound from chol
                             },
-           epochs=20000, batch_size=len(X_test), shuffle=False)
+           epochs=300, batch_size=144, shuffle=False)
 
 
     # nn.plot_graph()
