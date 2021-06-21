@@ -62,6 +62,8 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             # backward propagation
             deltaW, deltab = __backward_pass_extreme(output, np.array(Yi), forward_cache, model.layers)
 
+            deltaW -= (2*hyperparameters["lambda"] * model.weights["W2"])
+
             # print("calcolo deltaW dalla forward =\n" + str(momentum_1_w_cap))
 
             # update moment estimates
@@ -78,22 +80,16 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
             momentum_2_b_cap = momentum_2_b / (1 - (beta_2 ** (i + 1)))
 
             # update weight values
-            update = momentum_1_w_cap / (np.sqrt(momentum_2_w_cap) + epsilon_adam)
-            if hyperparameters["lambda"] > 0:
-                update -= 2 * hyperparameters["lambda"] * model.weights["W2"]
-            model.weights["W2"] += hyperparameters["stepsize"] * update
+            model.weights["W2"] += hyperparameters["stepsize"] * (((momentum_1_w_cap) / (np.sqrt(momentum_2_w_cap) + epsilon_adam)))
 
-            update_b = momentum_1_b_cap / (np.sqrt(momentum_2_b_cap) + epsilon_adam)
-            if hyperparameters["lambda"] > 0:
-                update_b -= 2 * hyperparameters["lambda"] * model.weights["b2"]
-            # update bias
-            model.weights["b2"] += hyperparameters["stepsize"] * update_b
+            #model.weights["b2"] += hyperparameters["stepsize"] * (((momentum_1_b_cap) / (np.sqrt(momentum_2_b_cap) + epsilon_adam)))
+
 
             # save norm of the gradient for each batch
             norm_grad = LA.norm(np.array(deltaW).flatten())
             batch_norms.append(norm_grad)
             # save losses by mean in batch
-            score = LA.norm(np.array(model.weights["W2"]).flatten())**2
+            score = np.sum(np.square(np.array(model.weights["W2"]).flatten()))
             loss.append(model.score_mse(X, labels) + hyperparameters["lambda"] * score)
 
         norm_of_gradients.append(np.mean(batch_norms))
@@ -161,16 +157,6 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
 
     text_file = open("Output.txt", "w")
     for element in convergence_rate:
-        text_file.write(str(element) + ",")
-    text_file.close()
-
-    text_file = open("Variance.txt", "w")
-    for element in variances:
-        text_file.write(str(element) + ",")
-    text_file.close()
-
-    text_file = open("norms.txt", "w")
-    for element in norm_of_gradients:
         text_file.write(str(element) + ",")
     text_file.close()
 

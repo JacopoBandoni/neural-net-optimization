@@ -121,7 +121,7 @@ def cholesky_scratch(X, labels, model, regularization, weights: dict, layers: di
         raise Exception("Wrong problem statemenet (regression or classification)")
 
     print("Error: ", "{:.1e}".format(history["error_train"][-1]))
-    score = LA.norm(np.array(model.weights["W2"]).flatten())**2
+    score = np.sum(np.square(np.array(model.weights["W2"]).flatten()))
     print("Loss: ", "{:.1e}".format(history["error_train"][-1] + regularization * score))
 
     # here A == H*H.t + n*lambda*I

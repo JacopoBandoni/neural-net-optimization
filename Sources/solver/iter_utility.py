@@ -21,7 +21,7 @@ def __forward_pass(x, weights: dict, layers, cache):
 
     for i in range(1, len(layers)):
 
-        output = output @ weights['W' + str(i)] + weights['b' + str(i)]
+        output = output @ weights['W' + str(i)] # + weights['b' + str(i)]
 
         if cache:
             forward_cache["net" + str(i)] = output
@@ -114,9 +114,9 @@ def __backward_pass_extreme(output, labels, forward_cache: dict, layers):
         # compute delta_i = (yi - oi)f'(neti) for each pattern
         delta_i = delta_i.T * apply_d_activation(layers[len(layers)-1]["activation"],
                                                  forward_cache['net2'][:, [i]].T)
-
         # compute delta b for the i-th neuron in output
         deltab.append(delta_i.T.mean(axis=0).tolist())
+
         # compute oj(yi - oi)f'(neti) for each pattern and do the mean on all the pattern
         deltaW.append((np.array(forward_cache['output1']) * delta_i.T)
                       .mean(axis=0).tolist())
