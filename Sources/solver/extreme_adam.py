@@ -160,6 +160,7 @@ def extreme_adam(X, labels, model, hyperparameters: dict, max_epochs: int, batch
         text_file.write(str(element) + ",")
     text_file.close()
 
+
     fontsize_legend_axis = 14
     plt.plot(norm_of_gradients)
     plt.title('Norm of gradients')
