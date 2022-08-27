@@ -1,7 +1,7 @@
 # Neural Network Optimization Library
 This is a simple neural network library that allow to build and train standard neural network.
 
-### Optimization analysis
+## Optimization analysis
 
 We also provide a discusion and comparison on two different optimizer used to fit neural network:
 - Cholesky alghotihm
